@@ -28,6 +28,7 @@ const Sidebar = () => {
     { to: '/admin/businesses', icon: Building2, label: 'Entreprises' },
     { to: '/admin/employees', icon: Users, label: 'Employés' },
     { to: '/admin/accounting', icon: Calculator, label: 'Comptabilité' },
+    { to: '/admin/expenses', icon: Activity, label: 'Dépenses' },
     { to: '/admin/tax-notices', icon: FileText, label: 'Avis d\'impôts' },
     { to: '/admin/tax-brackets', icon: Settings, label: 'Tranches fiscales' },
   ];
