@@ -123,6 +123,7 @@ class EmployeeResponse(BaseModel):
     name: str
     business_id: str
     salary: float
+    permissions: Optional[dict] = None
     created_at: str
 
 # Transaction Models
