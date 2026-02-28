@@ -147,6 +147,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/expenses"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ExpensesReviewPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Business (Patron) Routes */}
       <Route
