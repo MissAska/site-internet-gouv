@@ -79,6 +79,17 @@ const CashRegisterPage = () => {
       toast.error('Veuillez entrer une description');
       return;
     }
+    // Validate expense fields
+    if (formData.type === 'expense') {
+      if (!formData.expense_category) {
+        toast.error('Veuillez sélectionner une catégorie de dépense');
+        return;
+      }
+      if (!formData.expense_details.trim()) {
+        toast.error('Veuillez détailler la dépense (justification obligatoire)');
+        return;
+      }
+    }
 
     setLoading(true);
     try {
@@ -86,11 +97,13 @@ const CashRegisterPage = () => {
         type: formData.type,
         amount: parseFloat(formData.amount),
         description: formData.description,
-        employee_id: formData.type === 'salary' ? formData.employee_id : null
+        employee_id: formData.type === 'salary' ? formData.employee_id : null,
+        expense_category: formData.type === 'expense' ? formData.expense_category : null,
+        expense_details: formData.type === 'expense' ? formData.expense_details : null
       };
       await axios.post(`${API}/transactions`, payload);
       toast.success('Transaction enregistrée');
-      setFormData({ type: 'income', amount: '', description: '', employee_id: '' });
+      setFormData({ type: 'income', amount: '', description: '', employee_id: '', expense_category: '', expense_details: '' });
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors de l\'enregistrement');
