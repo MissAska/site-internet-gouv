@@ -265,6 +265,7 @@ async def login(data: UserLogin):
         name=user["name"],
         role=user["role"],
         business_id=user.get("business_id"),
+        permissions=user.get("permissions"),
         created_at=user["created_at"]
     )
     return TokenResponse(access_token=token, user=user_response)
@@ -277,6 +278,7 @@ async def get_me(user: dict = Depends(get_current_user)):
         name=user["name"],
         role=user["role"],
         business_id=user.get("business_id"),
+        permissions=user.get("permissions"),
         created_at=user["created_at"]
     )
 
