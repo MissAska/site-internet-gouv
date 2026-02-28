@@ -568,12 +568,18 @@ async def update_tax_brackets(brackets: List[TaxBracket], admin: dict = Depends(
         await db.tax_brackets.insert_one(bracket.model_dump())
     return brackets
 
+MINIMUM_TAX = 5000.0  # Minimum tax amount even for negative profit
+
 def calculate_tax(taxable_income: float, brackets: List[dict]) -> tuple:
-    """Calculate tax based on brackets, returns (rate, amount)"""
+    """Calculate tax based on brackets, returns (rate, amount). Minimum tax is 5000$"""
+    if taxable_income <= 0:
+        return 0.0, MINIMUM_TAX  # Minimum tax even for negative profit
+    
     for bracket in sorted(brackets, key=lambda x: x["min_amount"], reverse=True):
         if taxable_income >= bracket["min_amount"]:
-            return bracket["rate"], taxable_income * bracket["rate"]
-    return 0.0, 0.0
+            calculated_tax = taxable_income * bracket["rate"]
+            return bracket["rate"], max(calculated_tax, MINIMUM_TAX)
+    return 0.0, MINIMUM_TAX
 
 @api_router.post("/tax-notices/generate", response_model=List[TaxNoticeResponse])
 async def generate_tax_notices(admin: dict = Depends(require_admin)):

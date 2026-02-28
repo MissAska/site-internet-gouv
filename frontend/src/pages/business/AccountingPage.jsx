@@ -272,7 +272,7 @@ const AccountingPage = () => {
                   <Calculator className={`w-8 h-8 ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`} />
                 </div>
                 <div>
-                  <p className="text-lg uppercase tracking-wider text-muted-foreground">Bénéfice net total</p>
+                  <p className="text-lg uppercase tracking-wider text-muted-foreground">Bénéfice brut total</p>
                   <p className="text-sm text-muted-foreground mt-1">
                     CA - Dépenses - Salaires = Bénéfice
                   </p>

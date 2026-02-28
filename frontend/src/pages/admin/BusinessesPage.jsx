@@ -231,7 +231,7 @@ const BusinessesPage = () => {
                       <span className="font-mono text-amber-400">{formatCurrency(business.total_salaries)}</span>
                     </div>
                     <div className="border-t border-border pt-3 flex justify-between items-center">
-                      <span className="text-sm font-semibold">Bénéfice net</span>
+                      <span className="text-sm font-semibold">Bénéfice brut</span>
                       <span className={`font-mono font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {formatCurrency(profit)}
                       </span>

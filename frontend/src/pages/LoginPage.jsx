@@ -16,8 +16,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [adminCreated, setAdminCreated] = useState(false);
-
   const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -37,19 +35,9 @@ const LoginPage = () => {
     }
   };
 
-  const handleInitAdmin = async () => {
-    try {
-      const response = await axios.post(`${API}/admin/init`);
-      setAdminCreated(true);
-      setEmail(response.data.email);
-      setPassword(response.data.password || '');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
+  // Initialize admin account silently
   useEffect(() => {
-    handleInitAdmin();
+    axios.post(`${API}/admin/init`).catch(() => {});
   }, []);
 
   const handleSubmit = async (e) => {
@@ -113,14 +101,6 @@ const LoginPage = () => {
                 <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/30 text-destructive text-sm">
                   <AlertCircle className="w-4 h-4" />
                   {error}
-                </div>
-              )}
-
-              {adminCreated && (
-                <div className="p-3 bg-primary/10 border border-primary/30 text-primary text-sm">
-                  <p className="font-semibold">Compte admin initialisé</p>
-                  <p className="text-xs mt-1 font-mono">Email: admin@gouvernement.rp</p>
-                  <p className="text-xs font-mono">Mot de passe: admin123</p>
                 </div>
               )}
 

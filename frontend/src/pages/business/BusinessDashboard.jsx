@@ -131,7 +131,7 @@ const BusinessDashboard = () => {
             color="red"
           />
           <StatCard
-            title="Bénéfice du mois"
+            title="Bénéfice brut du mois"
             value={formatCurrency(stats?.monthly_profit || 0)}
             icon={DollarSign}
             color={stats?.monthly_profit >= 0 ? 'green' : 'red'}
@@ -167,7 +167,7 @@ const BusinessDashboard = () => {
                 </span>
               </div>
               <div className="flex justify-between items-center p-4 bg-primary/10 border border-primary/30">
-                <span className="text-primary font-semibold">Bénéfice net</span>
+                <span className="text-primary font-semibold">Bénéfice brut</span>
                 <span className="font-mono font-bold text-primary text-xl">
                   {formatCurrency(
                     (business?.total_income || 0) - 

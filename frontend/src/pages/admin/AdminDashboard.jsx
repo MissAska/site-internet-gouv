@@ -133,7 +133,7 @@ const AdminDashboard = () => {
                     <th className="text-right">Chiffre d'affaires</th>
                     <th className="text-right">Dépenses</th>
                     <th className="text-right">Salaires</th>
-                    <th className="text-right">Bénéfice</th>
+                    <th className="text-right">Bénéfice brut</th>
                   </tr>
                 </thead>
                 <tbody>
