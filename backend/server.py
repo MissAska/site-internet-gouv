@@ -687,6 +687,17 @@ async def create_employee(data: EmployeeCreate, user: dict = Depends(require_pat
     employee_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     
+    # Default permissions if not provided
+    default_permissions = {
+        "cash_register": True,
+        "view_transactions": False,
+        "view_accounting": False,
+        "view_tax_notices": False,
+        "manage_employees": False
+    }
+    
+    permissions = data.permissions.model_dump() if data.permissions else default_permissions
+    
     employee_doc = {
         "id": employee_id,
         "email": data.email,
@@ -695,6 +706,7 @@ async def create_employee(data: EmployeeCreate, user: dict = Depends(require_pat
         "role": UserRole.EMPLOYEE,
         "business_id": business_id,
         "salary": data.salary,
+        "permissions": permissions,
         "created_at": now
     }
     await db.users.insert_one(employee_doc)
@@ -705,6 +717,7 @@ async def create_employee(data: EmployeeCreate, user: dict = Depends(require_pat
         name=data.name,
         business_id=business_id,
         salary=data.salary,
+        permissions=permissions,
         created_at=now
     )
 
