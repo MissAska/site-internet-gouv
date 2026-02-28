@@ -3,7 +3,7 @@ import axios from 'axios';
 import Layout from '../../components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { FileText, RefreshCw, Building2, Calendar, DollarSign } from 'lucide-react';
+import { FileText, RefreshCw, Building2, Calendar, DollarSign, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -57,6 +57,19 @@ const TaxNoticesPage = () => {
       toast.error(error.response?.data?.detail || 'Erreur lors de la génération');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleDeleteNotice = async (noticeId, businessName) => {
+    if (!window.confirm(`Supprimer l'avis d'impôt de "${businessName}" ?`)) {
+      return;
+    }
+    try {
+      await axios.delete(`${API}/tax-notices/${noticeId}`);
+      toast.success('Avis d\'impôt supprimé');
+      fetchNotices();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la suppression');
     }
   };
 
