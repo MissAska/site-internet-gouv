@@ -77,7 +77,7 @@ const EmployeesPage = () => {
       toast.success('Employé créé avec succès');
       setDialogOpen(false);
       setFormData({ name: '', email: '', password: '', salary: 0 });
-      fetchEmployees();
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors de la création');
     }
@@ -90,7 +90,7 @@ const EmployeesPage = () => {
     try {
       await axios.delete(`${API}/employees/${employeeId}`);
       toast.success('Employé supprimé');
-      fetchEmployees();
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors de la suppression');
     }
@@ -144,7 +144,7 @@ const EmployeesPage = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="employe@eyefinds.entreprise.info"
+                    placeholder={getEmailPlaceholder()}
                     className="bg-input border-border"
                     required
                     data-testid="employee-email-input"
