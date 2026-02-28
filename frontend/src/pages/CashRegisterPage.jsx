@@ -52,6 +52,12 @@ const CashRegisterPage = () => {
     expense_details: ''
   });
 
+  // Check permissions for employees
+  const permissions = user?.permissions || {};
+  const canRecordIncome = isPatron() || permissions.cash_register !== false;
+  const canRecordExpense = isPatron() || permissions.record_expenses === true;
+  const canRecordSalary = isPatron() || permissions.record_salaries === true;
+
   useEffect(() => {
     fetchData();
   }, []);
