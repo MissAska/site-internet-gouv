@@ -201,6 +201,20 @@ const TaxNoticesPage = () => {
                       </span>
                     </div>
                   </div>
+
+                  {/* Delete Button */}
+                  <div className="pt-4 border-t border-border">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteNotice(notice.id, notice.business_name)}
+                      data-testid={`delete-notice-${notice.id}`}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Supprimer cet avis
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
