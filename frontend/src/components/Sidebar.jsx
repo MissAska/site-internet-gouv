@@ -42,10 +42,36 @@ const Sidebar = () => {
     { to: '/cash-register', icon: DollarSign, label: 'Caisse' },
   ];
 
-  const employeeLinks = [
-    { to: '/cash-register', icon: DollarSign, label: 'Caisse enregistreuse' },
-    { to: '/employee/transactions', icon: Activity, label: 'Mes transactions' },
-  ];
+  // Dynamic employee links based on permissions
+  const getEmployeeLinks = () => {
+    const permissions = user?.permissions || {};
+    const links = [];
+    
+    if (permissions.cash_register !== false) {
+      links.push({ to: '/cash-register', icon: DollarSign, label: 'Caisse enregistreuse' });
+    }
+    if (permissions.view_transactions) {
+      links.push({ to: '/employee/transactions', icon: Activity, label: 'Transactions' });
+    }
+    if (permissions.view_accounting) {
+      links.push({ to: '/employee/accounting', icon: Calculator, label: 'Comptabilité' });
+    }
+    if (permissions.view_tax_notices) {
+      links.push({ to: '/employee/tax-notices', icon: FileText, label: 'Avis d\'impôts' });
+    }
+    if (permissions.manage_employees) {
+      links.push({ to: '/employee/manage', icon: Users, label: 'Employés' });
+    }
+    
+    // Always show at least one link
+    if (links.length === 0) {
+      links.push({ to: '/cash-register', icon: DollarSign, label: 'Caisse enregistreuse' });
+    }
+    
+    return links;
+  };
+
+  const employeeLinks = getEmployeeLinks();
 
   const links = isAdmin() ? adminLinks : isPatron() ? patronLinks : employeeLinks;
 
