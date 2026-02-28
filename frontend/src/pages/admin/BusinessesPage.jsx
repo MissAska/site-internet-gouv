@@ -86,6 +86,30 @@ const BusinessesPage = () => {
     }
   };
 
+  const openEditDialog = (business) => {
+    setEditData({
+      id: business.id,
+      name: business.name,
+      owner_name: business.owner_name
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`${API}/businesses/${editData.id}`, {
+        name: editData.name,
+        owner_name: editData.owner_name
+      });
+      toast.success('Entreprise modifiée avec succès');
+      setEditDialogOpen(false);
+      fetchBusinesses();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la modification');
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-8" data-testid="businesses-page">
