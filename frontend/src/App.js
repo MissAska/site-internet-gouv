@@ -21,6 +21,7 @@ import TaxNoticesPage from "./pages/admin/TaxNoticesPage";
 import TaxBracketsPage from "./pages/admin/TaxBracketsPage";
 import EmployeesAdminPage from "./pages/admin/EmployeesAdminPage";
 import GlobalAccountingPage from "./pages/admin/GlobalAccountingPage";
+import ExpensesReviewPage from "./pages/admin/ExpensesReviewPage";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import EmployeesPage from "./pages/business/EmployeesPage";
 import TransactionsPage from "./pages/business/TransactionsPage";
