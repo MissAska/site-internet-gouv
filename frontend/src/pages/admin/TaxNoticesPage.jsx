@@ -180,6 +180,44 @@ const TaxNoticesPage = () => {
           </CardContent>
         </Card>
 
+        {/* Filters and Sort */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-48 bg-input border-border" data-testid="sort-select">
+                <SelectValue placeholder="Trier par..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date_desc">Date (récent → ancien)</SelectItem>
+                <SelectItem value="date_asc">Date (ancien → récent)</SelectItem>
+                <SelectItem value="amount_desc">Montant (↓)</SelectItem>
+                <SelectItem value="amount_asc">Montant (↑)</SelectItem>
+                <SelectItem value="business">Entreprise (A-Z)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-muted-foreground" />
+            <Select value={filterBusiness} onValueChange={setFilterBusiness}>
+              <SelectTrigger className="w-56 bg-input border-border" data-testid="filter-business-select">
+                <SelectValue placeholder="Filtrer par entreprise..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les entreprises</SelectItem>
+                {businessNames.map(name => (
+                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="ml-auto text-sm text-muted-foreground">
+            {filteredAndSortedNotices.length} avis affichés
+          </div>
+        </div>
+
         {/* Notices List */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
