@@ -1,9 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import Layout from '../../components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { FileText, RefreshCw, Building2, Calendar, DollarSign, Trash2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import { FileText, RefreshCw, Building2, Calendar, DollarSign, Trash2, FileDown, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -30,6 +37,8 @@ const TaxNoticesPage = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [sortBy, setSortBy] = useState('date_desc');
+  const [filterBusiness, setFilterBusiness] = useState('all');
 
   useEffect(() => {
     fetchNotices();
@@ -57,6 +66,63 @@ const TaxNoticesPage = () => {
       toast.error(error.response?.data?.detail || 'Erreur lors de la génération');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  // Get unique business names for filter
+  const businessNames = useMemo(() => {
+    const names = [...new Set(notices.map(n => n.business_name))];
+    return names.sort();
+  }, [notices]);
+
+  // Filter and sort notices
+  const filteredAndSortedNotices = useMemo(() => {
+    let result = [...notices];
+    
+    // Filter by business
+    if (filterBusiness !== 'all') {
+      result = result.filter(n => n.business_name === filterBusiness);
+    }
+    
+    // Sort
+    switch (sortBy) {
+      case 'date_desc':
+        result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        break;
+      case 'date_asc':
+        result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        break;
+      case 'amount_desc':
+        result.sort((a, b) => b.tax_amount - a.tax_amount);
+        break;
+      case 'amount_asc':
+        result.sort((a, b) => a.tax_amount - b.tax_amount);
+        break;
+      case 'business':
+        result.sort((a, b) => a.business_name.localeCompare(b.business_name));
+        break;
+      default:
+        break;
+    }
+    
+    return result;
+  }, [notices, sortBy, filterBusiness]);
+
+  const handleExportPDF = async (noticeId) => {
+    try {
+      const response = await axios.get(`${API}/tax-notices/${noticeId}/pdf`, {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `avis_impot_${noticeId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('PDF exporté');
+    } catch (error) {
+      toast.error('Erreur lors de l\'export');
     }
   };
 
