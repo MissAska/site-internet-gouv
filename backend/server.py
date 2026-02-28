@@ -695,6 +695,8 @@ async def create_employee(data: EmployeeCreate, user: dict = Depends(require_pat
     # Default permissions if not provided
     default_permissions = {
         "cash_register": True,
+        "record_expenses": False,
+        "record_salaries": False,
         "view_transactions": False,
         "view_accounting": False,
         "view_tax_notices": False,
