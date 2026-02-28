@@ -220,7 +220,7 @@ const CashRegisterPage = () => {
                       <SelectContent>
                         {employees.map((employee) => (
                           <SelectItem key={employee.id} value={employee.id}>
-                            {employee.name} - {formatCurrency(employee.salary)}/mois
+                            {employee.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
