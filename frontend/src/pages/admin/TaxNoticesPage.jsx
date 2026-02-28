@@ -306,17 +306,27 @@ const TaxNoticesPage = () => {
                     </div>
                   </div>
 
-                  {/* Delete Button */}
-                  <div className="pt-4 border-t border-border">
+                  {/* Action Buttons */}
+                  <div className="pt-4 border-t border-border flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-primary hover:bg-primary/10"
+                      onClick={() => handleExportPDF(notice.id)}
+                      data-testid={`export-pdf-${notice.id}`}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Exporter PDF
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      className="flex-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => handleDeleteNotice(notice.id, notice.business_name)}
                       data-testid={`delete-notice-${notice.id}`}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Supprimer cet avis
+                      Supprimer
                     </Button>
                   </div>
                 </CardContent>
