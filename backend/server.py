@@ -31,11 +31,11 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Config
-JWT_SECRET = os.environ.get('JWT_SECRET', 'gta-rp-super-secret-key-2024')
+JWT_SECRET = os.environ.get('JWT_SECRET', 'eyefind-fiscal-secret-key-2024')
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
-app = FastAPI(title="GTA RP - Portail Fiscal")
+app = FastAPI(title="Eyefind - Portail Fiscal")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
