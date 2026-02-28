@@ -105,7 +105,9 @@ class BusinessResponse(BaseModel):
 
 # Employee Models
 class EmployeePermissions(BaseModel):
-    cash_register: bool = True      # Accès caisse enregistreuse
+    cash_register: bool = True       # Accès caisse (revenus uniquement)
+    record_expenses: bool = False    # Enregistrer des dépenses
+    record_salaries: bool = False    # Enregistrer des salaires
     view_transactions: bool = False  # Voir les transactions
     view_accounting: bool = False    # Voir la comptabilité
     view_tax_notices: bool = False   # Voir les avis d'impôts
