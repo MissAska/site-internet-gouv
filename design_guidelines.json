@@ -1,0 +1,169 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Eyefind OS - Government Edition",
+      "tone": "Corporate, Retro-Futuristic, Bureaucratic, Efficient, Trustworthy",
+      "aesthetic": "Dark Mode, Cyber-Corporate, High Contrast, Data-Dense",
+      "inspiration": "GTA V Eyefind, Bloomberg Terminal, Windows XP Dark Mode, Scifi Interfaces"
+    },
+    "typography": {
+      "font_family": {
+        "headings": ["Chakra Petch", "Oswald", "sans-serif"],
+        "body": ["IBM Plex Sans", "sans-serif"],
+        "mono": ["JetBrains Mono", "monospace"]
+      },
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-bold tracking-tight uppercase",
+        "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold tracking-wide",
+        "body_lg": "text-lg leading-relaxed",
+        "body": "text-base leading-relaxed",
+        "caption": "text-sm text-muted-foreground uppercase tracking-widest"
+      },
+      "usage": {
+        "headings": "Used for page titles, widget headers. Always uppercase or capitalized.",
+        "body": "Used for general content, descriptions.",
+        "mono": "MANDATORY for all financial data, dates, IDs, and tabular data."
+      }
+    },
+    "colors": {
+      "palette": {
+        "background": {
+          "DEFAULT": "#020617",
+          "secondary": "#0f172a",
+          "tertiary": "#1e293b"
+        },
+        "foreground": {
+          "DEFAULT": "#f8fafc",
+          "muted": "#94a3b8",
+          "dark": "#0f172a"
+        },
+        "primary": {
+          "DEFAULT": "#0ea5e9",
+          "foreground": "#ffffff",
+          "hover": "#0284c7"
+        },
+        "secondary": {
+          "DEFAULT": "#1e293b",
+          "foreground": "#f8fafc"
+        },
+        "success": {
+          "DEFAULT": "#22c55e",
+          "foreground": "#ffffff"
+        },
+        "warning": {
+          "DEFAULT": "#f59e0b",
+          "foreground": "#000000"
+        },
+        "destructive": {
+          "DEFAULT": "#ef4444",
+          "foreground": "#ffffff"
+        },
+        "border": "#1e293b",
+        "input": "#0f172a",
+        "ring": "#0ea5e9"
+      },
+      "semantic": {
+        "income": "text-green-500",
+        "expense": "text-red-500",
+        "tax": "text-amber-500",
+        "link": "text-sky-400 hover:text-sky-300 underline-offset-4 hover:underline"
+      }
+    },
+    "visual_enhancers": {
+      "radius": {
+        "default": "rounded-none",
+        "sm": "rounded-sm",
+        "lg": "rounded-md",
+        "full": "rounded-full"
+      },
+      "shadows": {
+        "card": "shadow-[0_0_0_1px_rgba(30,41,59,1)]",
+        "glow": "shadow-[0_0_15px_rgba(14,165,233,0.15)]",
+        "neon": "shadow-[0_0_10px_#0ea5e9,0_0_20px_#0ea5e9]"
+      },
+      "borders": {
+        "default": "border border-border",
+        "active": "border-l-4 border-l-primary"
+      },
+      "gradients": {
+        "subtle": "bg-gradient-to-b from-slate-900 to-slate-950"
+      }
+    }
+  },
+  "layout_strategy": {
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "section_gap": "gap-8",
+      "component_gap": "gap-4"
+    },
+    "grids": {
+      "dashboard_admin": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "dashboard_boss": "grid grid-cols-1 md:grid-cols-3 gap-6",
+      "cash_register": "grid grid-cols-2 md:grid-cols-4 gap-4"
+    },
+    "containers": {
+      "main": "min-h-screen bg-background text-foreground font-sans selection:bg-primary/20",
+      "card": "bg-card text-card-foreground border border-border shadow-sm p-6 relative overflow-hidden"
+    }
+  },
+  "components": {
+    "Button": {
+      "default": "rounded-sm font-semibold uppercase tracking-wider transition-all duration-200 active:scale-95",
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow",
+      "ghost": "hover:bg-accent hover:text-accent-foreground"
+    },
+    "Card": {
+      "base": "rounded-none border border-slate-800 bg-slate-900/50 backdrop-blur-sm",
+      "header": "border-b border-slate-800 pb-4 mb-4"
+    },
+    "Input": {
+      "base": "rounded-none bg-slate-950 border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-slate-600"
+    },
+    "Badge": {
+      "base": "rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+    },
+    "Table": {
+      "wrapper": "border rounded-sm overflow-hidden",
+      "header": "bg-slate-900 text-slate-400 uppercase text-xs tracking-wider",
+      "row": "hover:bg-slate-800/50 transition-colors border-b border-slate-800 last:border-0",
+      "cell": "p-4 font-mono text-sm"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_background": "https://images.unsplash.com/photo-1697402918472-3fc44c607cce?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwyfHxuaWdodCUyMGNpdHklMjBza3lsaW5lJTIwYmx1ZSUyMGFlc3RoZXRpY3xlbnwwfHx8fDE3NzIzMTc2NDN8MA&ixlib=rb-4.1.0&q=85",
+      "admin_dashboard_bg": "https://images.unsplash.com/photo-1628536250739-06f5353d6364?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwxfHxuaWdodCUyMGNpdHklMjBza3lsaW5lJTIwYmx1ZSUyMGFlc3RoZXRpY3xlbnwwfHx8fDE3NzIzMTc2NDN8MA&ixlib=rb-4.1.0&q=85",
+      "gov_icon": "https://images.unsplash.com/photo-1680992046626-418f7e910589?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzOTB8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBzZXJ2ZXIlMjByb29tJTIwYmx1ZSUyMGxpZ2h0c3xlbnwwfHx8fDE3NzIzMTc2NDV8MA&ixlib=rb-4.1.0&q=85",
+      "money_texture": "https://images.unsplash.com/photo-1710761522946-fb8b390547fd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwxfHxzdGFjayUyMG9mJTIwbW9uZXklMjBkb2xsYXIlMjBiaWxscyUyMGRhcmt8ZW58MHx8fHwxNzcyMzE3NjQ1fDA&ixlib=rb-4.1.0&q=85",
+      "office_texture": "https://images.unsplash.com/photo-1758833502047-8f1c7dc5edd7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwyfHxsdXh1cnklMjBtb2Rlcm4lMjBvZmZpY2UlMjBpbnRlcmlvciUyMG5pZ2h0fGVufDB8fHx8MTc3MjMxNzY0Nnww&ixlib=rb-4.1.0&q=85"
+    },
+    "icons": {
+      "library": "lucide-react",
+      "recommended": ["Building2", "Users", "Briefcase", "DollarSign", "Landmark", "FileText", "Activity", "LogOut", "Settings", "TrendingUp", "TrendingDown"]
+    }
+  },
+  "motion": {
+    "transitions": "transition-all duration-200 ease-in-out",
+    "hover": "hover:translate-y-[-2px] hover:shadow-glow",
+    "page_load": "animate-in fade-in zoom-in-95 duration-300",
+    "list_item": "animate-in slide-in-from-left-4 duration-300 stagger-100"
+  },
+  "instructions_to_main_agent": [
+    "INSTALL FONTS: Add '@fontsource/chakra-petch', '@fontsource/ibm-plex-sans', and '@fontsource/jetbrains-mono' to package.json immediately.",
+    "THEME SETUP: Ensure tailwind.config.js has the specific colors defined in 'design_system.colors'. Extend the theme, do not overwrite default Tailwind colors unless necessary.",
+    "LAYOUT: Use a Sidebar Layout for all logged-in pages. The sidebar should be collapsible on mobile.",
+    "DATA DISPLAY: All financial values must be formatted as currency (e.g., '$ 1,200,000') and right-aligned in tables.",
+    "CHARTING: Use Recharts for the 'Comptabilité' page. Style the lines/bars with the primary and success colors defined.",
+    "FORMS: Use Shadcn Form components. Ensure validation messages are visible in Red-500.",
+    "TAX SYSTEM: The 'Avis d'impôts' generation should be visually distinct - maybe look like a paper document or a specialized alert card.",
+    "ACCESSIBILITY: Ensure text contrast ratios are met. The blue text on slate background is risky, verify contrast."
+  ],
+  "universal_guidelines": [
+    "Avoid generic 'center-everything' layouts. Use grids.",
+    "No gradients for backgrounds unless it's a very subtle noise texture.",
+    "Use 'data-testid' on all interactive elements.",
+    "Dark mode ONLY. Do not implement light mode toggle.",
+    "French language interface is mandatory."
+  ]
+}
