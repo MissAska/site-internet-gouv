@@ -31,7 +31,10 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Config
-JWT_SECRET = os.environ.get('JWT_SECRET', 'eyefind-fiscal-secret-key-2024')
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    JWT_SECRET = 'dev-only-secret-change-in-production'
+    logger.warning("JWT_SECRET not set in environment, using development default. SET THIS IN PRODUCTION!")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
