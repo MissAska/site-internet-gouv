@@ -428,6 +428,69 @@ async def delete_business(business_id: str, admin: dict = Depends(require_admin)
     
     return {"message": "Entreprise supprimée"}
 
+@api_router.put("/businesses/{business_id}", response_model=BusinessResponse)
+async def update_business(business_id: str, data: BusinessUpdate, admin: dict = Depends(require_admin)):
+    business = await db.businesses.find_one({"id": business_id})
+    if not business:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    
+    update_data = {}
+    if data.name:
+        update_data["name"] = data.name
+    if data.owner_name:
+        update_data["owner_name"] = data.owner_name
+        # Also update the owner's name in users collection
+        await db.users.update_one({"id": business["owner_id"]}, {"$set": {"name": data.owner_name}})
+    
+    if update_data:
+        await db.businesses.update_one({"id": business_id}, {"$set": update_data})
+    
+    # Return updated business
+    updated = await db.businesses.find_one({"id": business_id}, {"_id": 0})
+    
+    # Calculate totals
+    income = await db.transactions.aggregate([
+        {"$match": {"business_id": business_id, "type": TransactionType.INCOME}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]).to_list(1)
+    expenses = await db.transactions.aggregate([
+        {"$match": {"business_id": business_id, "type": TransactionType.EXPENSE}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]).to_list(1)
+    salaries = await db.transactions.aggregate([
+        {"$match": {"business_id": business_id, "type": TransactionType.SALARY}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]).to_list(1)
+    
+    return BusinessResponse(
+        id=updated["id"],
+        name=updated["name"],
+        owner_id=updated["owner_id"],
+        owner_name=updated["owner_name"],
+        created_at=updated["created_at"],
+        total_income=income[0]["total"] if income else 0.0,
+        total_expenses=expenses[0]["total"] if expenses else 0.0,
+        total_salaries=salaries[0]["total"] if salaries else 0.0
+    )
+
+# Route for admin to get all expenses with details
+@api_router.get("/admin/expenses")
+async def get_all_expenses(admin: dict = Depends(require_admin)):
+    """Get all expense transactions with details for government review"""
+    expenses = await db.transactions.find(
+        {"type": TransactionType.EXPENSE},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Add business name to each expense
+    result = []
+    for expense in expenses:
+        business = await db.businesses.find_one({"id": expense["business_id"]}, {"_id": 0})
+        expense["business_name"] = business["name"] if business else "Inconnu"
+        result.append(expense)
+    
+    return result
+
 # =============================================================================
 # EMPLOYEE ROUTES
 # =============================================================================
