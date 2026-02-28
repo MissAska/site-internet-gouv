@@ -255,6 +255,49 @@ const CashRegisterPage = () => {
                   />
                 </div>
 
+                {/* Expense Details (only for expenses) */}
+                {formData.type === 'expense' && (
+                  <div className="space-y-4 p-4 bg-red-500/5 border border-red-500/20">
+                    <p className="text-sm text-red-400 font-semibold uppercase tracking-wider">
+                      Détails de la dépense (obligatoire)
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <Label className="uppercase tracking-wider text-xs">Catégorie</Label>
+                      <Select
+                        value={formData.expense_category}
+                        onValueChange={(value) => setFormData({ ...formData, expense_category: value })}
+                      >
+                        <SelectTrigger className="bg-input border-border" data-testid="expense-category-select">
+                          <SelectValue placeholder="Sélectionner une catégorie" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {EXPENSE_CATEGORIES.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="uppercase tracking-wider text-xs">Justification détaillée</Label>
+                      <Textarea
+                        value={formData.expense_details}
+                        onChange={(e) => setFormData({ ...formData, expense_details: e.target.value })}
+                        placeholder="Décrivez en détail la nature de cette dépense, son utilité pour l'entreprise, et joignez toute information pertinente..."
+                        className="bg-input border-border resize-none"
+                        rows={4}
+                        data-testid="expense-details-input"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Ces informations seront visibles par le gouvernement lors du contrôle fiscal.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Submit */}
                 <Button
                   type="submit"
