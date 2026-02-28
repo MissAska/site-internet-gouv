@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../../components/ui/dialog';
-import { Building2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Building2, Plus, Trash2, Eye, EyeOff, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -30,12 +30,18 @@ const BusinessesPage = () => {
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     owner_email: '',
     owner_name: '',
     owner_password: ''
+  });
+  const [editData, setEditData] = useState({
+    id: '',
+    name: '',
+    owner_name: ''
   });
 
   useEffect(() => {
