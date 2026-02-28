@@ -30,6 +30,7 @@ const formatCurrency = (amount) => {
 const EmployeesPage = () => {
   const { user } = useAuth();
   const [employees, setEmployees] = useState([]);
+  const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,19 +42,32 @@ const EmployeesPage = () => {
   });
 
   useEffect(() => {
-    fetchEmployees();
+    fetchData();
   }, []);
 
-  const fetchEmployees = async () => {
+  const fetchData = async () => {
     try {
-      const response = await axios.get(`${API}/employees`);
-      setEmployees(response.data);
+      const [employeesRes, businessRes] = await Promise.all([
+        axios.get(`${API}/employees`),
+        user?.business_id ? axios.get(`${API}/businesses/${user.business_id}`) : Promise.resolve({ data: null })
+      ]);
+      setEmployees(employeesRes.data);
+      setBusiness(businessRes.data);
     } catch (error) {
-      console.error('Error fetching employees:', error);
+      console.error('Error fetching data:', error);
       toast.error('Erreur lors du chargement des employés');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Generate email placeholder based on business name
+  const getEmailPlaceholder = () => {
+    if (business?.name) {
+      const cleanName = business.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return `employe@eyefinds.${cleanName}.info`;
+    }
+    return 'employe@eyefinds.nomdelentreprise.info';
   };
 
   const handleSubmit = async (e) => {
