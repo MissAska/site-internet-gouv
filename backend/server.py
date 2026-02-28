@@ -284,7 +284,7 @@ async def init_admin():
     admin_id = str(uuid.uuid4())
     admin_doc = {
         "id": admin_id,
-        "email": "admin@gouvernement.rp",
+        "email": "admin@eyefinds.entreprise.info",
         "password": hash_password("admin123"),
         "name": "Administrateur Gouvernement",
         "role": UserRole.ADMIN,
@@ -292,7 +292,7 @@ async def init_admin():
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(admin_doc)
-    return {"message": "Admin créé", "email": "admin@gouvernement.rp", "password": "admin123"}
+    return {"message": "Admin créé", "email": "admin@eyefinds.entreprise.info", "password": "admin123"}
 
 # =============================================================================
 # USER MANAGEMENT ROUTES (Admin)
