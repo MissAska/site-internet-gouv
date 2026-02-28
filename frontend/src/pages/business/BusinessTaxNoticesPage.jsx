@@ -69,7 +69,8 @@ const BusinessTaxNoticesPage = () => {
             <div>
               <p className="font-medium">Périodicité</p>
               <p className="text-sm text-muted-foreground">
-                Les avis d'impôts sont générés chaque dimanche à 23h59 par le gouvernement
+                Les avis d'impôts sont générés chaque dimanche à 23h59 par le gouvernement.
+                <span className="text-amber-400 font-semibold"> Minimum: 5 000 $US même en cas de bénéfice négatif.</span>
               </p>
             </div>
           </CardContent>
@@ -143,7 +144,7 @@ const BusinessTaxNoticesPage = () => {
                           <span className="font-mono font-bold text-amber-400">- {formatCurrency(notice.total_salaries)}</span>
                         </div>
                         <div className="flex justify-between p-3 bg-primary/10 border border-primary/30">
-                          <span className="font-semibold">Bénéfice imposable</span>
+                          <span className="font-semibold">Bénéfice brut imposable</span>
                           <span className="font-mono font-bold text-primary">{formatCurrency(notice.taxable_income)}</span>
                         </div>
                       </div>

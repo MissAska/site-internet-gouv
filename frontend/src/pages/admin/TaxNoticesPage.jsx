@@ -94,7 +94,8 @@ const TaxNoticesPage = () => {
             <div>
               <p className="font-medium">Génération automatique</p>
               <p className="text-sm text-muted-foreground">
-                Les avis d'impôts sont générés automatiquement chaque dimanche à 23h59
+                Les avis d'impôts sont générés automatiquement chaque dimanche à 23h59. 
+                <span className="text-amber-400 font-semibold"> Minimum: 5 000 $US même en cas de bénéfice négatif.</span>
               </p>
             </div>
           </CardContent>
@@ -168,7 +169,7 @@ const TaxNoticesPage = () => {
                       <span className="font-mono text-amber-400">- {formatCurrency(notice.total_salaries)}</span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-border">
-                      <span className="font-medium">Bénéfice imposable</span>
+                      <span className="font-semibold">Bénéfice brut imposable</span>
                       <span className="font-mono font-semibold">{formatCurrency(notice.taxable_income)}</span>
                     </div>
                   </div>
