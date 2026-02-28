@@ -26,7 +26,7 @@ const Sidebar = () => {
   const adminLinks = [
     { to: '/admin', icon: LayoutDashboard, label: 'Tableau de bord' },
     { to: '/admin/businesses', icon: Building2, label: 'Entreprises' },
-    { to: '/admin/employees', icon: Users, label: 'Employés' },
+    { to: '/admin/users', icon: Users, label: 'Comptes' },
     { to: '/admin/accounting', icon: Calculator, label: 'Comptabilité' },
     { to: '/admin/expenses', icon: Activity, label: 'Dépenses' },
     { to: '/admin/tax-notices', icon: FileText, label: 'Avis d\'impôts' },
