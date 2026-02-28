@@ -103,11 +103,19 @@ class BusinessResponse(BaseModel):
     total_salaries: float = 0.0
 
 # Employee Models
+class EmployeePermissions(BaseModel):
+    cash_register: bool = True      # Accès caisse enregistreuse
+    view_transactions: bool = False  # Voir les transactions
+    view_accounting: bool = False    # Voir la comptabilité
+    view_tax_notices: bool = False   # Voir les avis d'impôts
+    manage_employees: bool = False   # Gérer les employés
+
 class EmployeeCreate(BaseModel):
     email: EmailStr
     password: str
     name: str
     salary: float = 0.0
+    permissions: Optional[EmployeePermissions] = None
 
 class EmployeeResponse(BaseModel):
     id: str
