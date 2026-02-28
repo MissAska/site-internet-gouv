@@ -737,6 +737,7 @@ async def get_employees(user: dict = Depends(get_current_user)):
         name=e["name"],
         business_id=e["business_id"],
         salary=e.get("salary", 0),
+        permissions=e.get("permissions"),
         created_at=e["created_at"]
     ) for e in employees]
 
