@@ -155,46 +155,55 @@ const CashRegisterPage = () => {
                 <div className="space-y-3">
                   <Label className="uppercase tracking-wider text-xs">Type de transaction</Label>
                   <div className="grid grid-cols-3 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: 'income', employee_id: '' })}
-                      className={`p-4 flex flex-col items-center gap-2 border transition-all ${
-                        formData.type === 'income'
-                          ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                          : 'bg-secondary border-border text-muted-foreground hover:border-green-500/30'
-                      }`}
-                      data-testid="type-income-btn"
-                    >
-                      <TrendingUp className="w-6 h-6" />
-                      <span className="text-sm font-semibold uppercase">Revenu</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: 'expense', employee_id: '' })}
-                      className={`p-4 flex flex-col items-center gap-2 border transition-all ${
-                        formData.type === 'expense'
-                          ? 'bg-red-500/20 border-red-500/50 text-red-400'
-                          : 'bg-secondary border-border text-muted-foreground hover:border-red-500/30'
-                      }`}
-                      data-testid="type-expense-btn"
-                    >
-                      <TrendingDown className="w-6 h-6" />
-                      <span className="text-sm font-semibold uppercase">Dépense</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, type: 'salary' })}
-                      className={`p-4 flex flex-col items-center gap-2 border transition-all ${
-                        formData.type === 'salary'
-                          ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
-                          : 'bg-secondary border-border text-muted-foreground hover:border-amber-500/30'
-                      }`}
-                      data-testid="type-salary-btn"
-                    >
-                      <Users className="w-6 h-6" />
-                      <span className="text-sm font-semibold uppercase">Salaire</span>
-                    </button>
+                    {canRecordIncome && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, type: 'income', employee_id: '' })}
+                        className={`p-4 flex flex-col items-center gap-2 border transition-all ${
+                          formData.type === 'income'
+                            ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                            : 'bg-secondary border-border text-muted-foreground hover:border-green-500/30'
+                        }`}
+                        data-testid="type-income-btn"
+                      >
+                        <TrendingUp className="w-6 h-6" />
+                        <span className="text-sm font-semibold uppercase">Revenu</span>
+                      </button>
+                    )}
+                    {canRecordExpense && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, type: 'expense', employee_id: '' })}
+                        className={`p-4 flex flex-col items-center gap-2 border transition-all ${
+                          formData.type === 'expense'
+                            ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                            : 'bg-secondary border-border text-muted-foreground hover:border-red-500/30'
+                        }`}
+                        data-testid="type-expense-btn"
+                      >
+                        <TrendingDown className="w-6 h-6" />
+                        <span className="text-sm font-semibold uppercase">Dépense</span>
+                      </button>
+                    )}
+                    {canRecordSalary && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, type: 'salary' })}
+                        className={`p-4 flex flex-col items-center gap-2 border transition-all ${
+                          formData.type === 'salary'
+                            ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
+                            : 'bg-secondary border-border text-muted-foreground hover:border-amber-500/30'
+                        }`}
+                        data-testid="type-salary-btn"
+                      >
+                        <Users className="w-6 h-6" />
+                        <span className="text-sm font-semibold uppercase">Salaire</span>
+                      </button>
+                    )}
                   </div>
+                  {!canRecordIncome && !canRecordExpense && !canRecordSalary && (
+                    <p className="text-sm text-destructive">Vous n'avez aucune permission pour enregistrer des transactions.</p>
+                  )}
                 </div>
 
                 {/* Employee Select (for salary) */}
