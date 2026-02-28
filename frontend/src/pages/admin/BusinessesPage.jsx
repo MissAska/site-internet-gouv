@@ -283,6 +283,47 @@ const BusinessesPage = () => {
             })}
           </div>
         )}
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="uppercase tracking-wide" style={{ fontFamily: 'Chakra Petch' }}>
+                Modifier l'entreprise
+              </DialogTitle>
+              <DialogDescription>
+                Modifiez les informations de l'entreprise
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEdit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label className="uppercase tracking-wider text-xs">Nom de l'entreprise</Label>
+                <Input
+                  value={editData.name}
+                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  placeholder="Ex: Los Santos Customs"
+                  className="bg-input border-border"
+                  required
+                  data-testid="edit-business-name-input"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="uppercase tracking-wider text-xs">Nom du patron</Label>
+                <Input
+                  value={editData.owner_name}
+                  onChange={(e) => setEditData({ ...editData, owner_name: e.target.value })}
+                  placeholder="Ex: John Smith"
+                  className="bg-input border-border"
+                  required
+                  data-testid="edit-owner-name-input"
+                />
+              </div>
+              <Button type="submit" className="w-full uppercase tracking-wider" data-testid="submit-edit-btn">
+                Enregistrer les modifications
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
