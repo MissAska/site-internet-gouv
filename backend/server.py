@@ -90,6 +90,7 @@ class BusinessCreate(BaseModel):
 
 class BusinessUpdate(BaseModel):
     name: Optional[str] = None
+    owner_name: Optional[str] = None
 
 class BusinessResponse(BaseModel):
     id: str
