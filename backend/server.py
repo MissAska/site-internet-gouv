@@ -507,6 +507,13 @@ async def create_transaction(data: TransactionCreate, user: dict = Depends(get_c
     if not business_id:
         raise HTTPException(status_code=400, detail="Utilisateur non associé à une entreprise")
     
+    # Require expense details for expense transactions
+    if data.type == TransactionType.EXPENSE:
+        if not data.expense_category:
+            raise HTTPException(status_code=400, detail="La catégorie de dépense est obligatoire")
+        if not data.expense_details:
+            raise HTTPException(status_code=400, detail="Le détail de la dépense est obligatoire")
+    
     transaction_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     
@@ -524,6 +531,8 @@ async def create_transaction(data: TransactionCreate, user: dict = Depends(get_c
         "description": data.description,
         "employee_id": data.employee_id,
         "employee_name": employee_name,
+        "expense_category": data.expense_category if data.type == TransactionType.EXPENSE else None,
+        "expense_details": data.expense_details if data.type == TransactionType.EXPENSE else None,
         "created_at": now,
         "created_by": user["id"]
     }
