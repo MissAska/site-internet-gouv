@@ -1,34 +1,156 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* GTA RP Tax Portal - Eyefind Theme */
+
+/* Base resets */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
-}
-
-.App-header {
-    background-color: #0f0f10;
+/* App container */
+.App {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
+    background-color: hsl(222 47% 3%);
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: hsl(222 47% 3%);
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsl(217 33% 17%);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: hsl(199 89% 48%);
+}
+
+/* Focus outlines */
+*:focus-visible {
+    outline: 2px solid hsl(199 89% 48%);
+    outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+    background: hsl(199 89% 48% / 0.3);
     color: white;
 }
 
-.App-link {
-    color: #61dafb;
-}
-
-@keyframes App-logo-spin {
+/* Animations */
+@keyframes fadeIn {
     from {
-        transform: rotate(0deg);
+        opacity: 0;
     }
     to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideInUp {
+    animation: slideInUp 0.3s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Form input placeholder styling */
+input::placeholder,
+textarea::placeholder {
+    color: hsl(215 20% 40%);
+}
+
+/* Table hover effect */
+tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+/* Card transitions */
+.card-hover {
+    transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px hsl(199 89% 48% / 0.1);
+}
+
+/* Button active state */
+button:active {
+    transform: scale(0.98);
+}
+
+/* Loading spinner */
+.spinner {
+    border: 2px solid hsl(217 33% 17%);
+    border-top-color: hsl(199 89% 48%);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
         transform: rotate(360deg);
+    }
+}
+
+/* Glow effect for primary elements */
+.glow {
+    box-shadow: 0 0 15px hsl(199 89% 48% / 0.3);
+}
+
+.glow:hover {
+    box-shadow: 0 0 25px hsl(199 89% 48% / 0.5);
+}
+
+/* Typography utilities */
+.font-heading {
+    font-family: 'Chakra Petch', sans-serif;
+}
+
+.font-body {
+    font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ml-64 {
+        margin-left: 0;
     }
 }
