@@ -119,7 +119,15 @@ function AppRoutes() {
         path="/admin/employees"
         element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <EmployeesAdminPage />
+            <UsersManagementPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <UsersManagementPage />
           </ProtectedRoute>
         }
       />
