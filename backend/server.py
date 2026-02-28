@@ -685,6 +685,250 @@ async def delete_tax_notice(notice_id: str, admin: dict = Depends(require_admin)
     await db.tax_notices.delete_one({"id": notice_id})
     return {"message": "Avis d'impôt supprimé"}
 
+@api_router.get("/tax-notices/{notice_id}/pdf")
+async def export_tax_notice_pdf(notice_id: str, user: dict = Depends(get_current_user)):
+    """Export a tax notice as PDF"""
+    notice = await db.tax_notices.find_one({"id": notice_id}, {"_id": 0})
+    if not notice:
+        raise HTTPException(status_code=404, detail="Avis d'impôt non trouvé")
+    
+    if user["role"] != UserRole.ADMIN and user.get("business_id") != notice["business_id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    # Generate PDF
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=20, alignment=TA_CENTER, spaceAfter=30)
+    subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=12, alignment=TA_CENTER, textColor=colors.grey)
+    header_style = ParagraphStyle('Header', parent=styles['Heading2'], fontSize=14, spaceAfter=10)
+    
+    elements = []
+    
+    # Header
+    elements.append(Paragraph("GOUVERNEMENT - PORTAIL FISCAL", subtitle_style))
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph("AVIS D'IMPOSITION", title_style))
+    elements.append(Spacer(1, 20))
+    
+    # Business info
+    elements.append(Paragraph(f"Entreprise: {notice['business_name']}", header_style))
+    period_start = datetime.fromisoformat(notice['period_start']).strftime('%d/%m/%Y')
+    period_end = datetime.fromisoformat(notice['period_end']).strftime('%d/%m/%Y')
+    elements.append(Paragraph(f"Période: {period_start} - {period_end}", styles['Normal']))
+    created_at = datetime.fromisoformat(notice['created_at']).strftime('%d/%m/%Y %H:%M')
+    elements.append(Paragraph(f"Date d'émission: {created_at}", styles['Normal']))
+    elements.append(Spacer(1, 30))
+    
+    # Financial table
+    def format_currency(amount):
+        return f"${amount:,.0f}".replace(',', ' ')
+    
+    data = [
+        ['Description', 'Montant'],
+        ['Chiffre d\'affaires brut', format_currency(notice['gross_revenue'])],
+        ['Dépenses', f"- {format_currency(notice['total_expenses'])}"],
+        ['Salaires versés', f"- {format_currency(notice['total_salaries'])}"],
+        ['Bénéfice brut imposable', format_currency(notice['taxable_income'])],
+        ['', ''],
+        ['Taux d\'imposition', f"{notice['tax_rate']*100:.0f}%"],
+        ['IMPÔT À PAYER', format_currency(notice['tax_amount'])],
+    ]
+    
+    table = Table(data, colWidths=[10*cm, 5*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#f59e0b')),
+        ('TEXTCOLOR', (0, -1), (-1, -1), colors.black),
+        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, -1), (-1, -1), 14),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#334155')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(table)
+    
+    elements.append(Spacer(1, 40))
+    elements.append(Paragraph("Note: Minimum de $5,000 d'impôts même en cas de bénéfice négatif.", 
+                              ParagraphStyle('Note', parent=styles['Normal'], fontSize=10, textColor=colors.grey)))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    filename = f"avis_impot_{notice['business_name'].replace(' ', '_')}_{period_end.replace('/', '-')}.pdf"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+# =============================================================================
+# GLOBAL ACCOUNTING ROUTES (Admin)
+# =============================================================================
+
+@api_router.get("/accounting/global")
+async def get_global_accounting(admin: dict = Depends(require_admin)):
+    """Get global accounting for all businesses"""
+    businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
+    
+    result = []
+    for b in businesses:
+        # Calculate totals
+        income = await db.transactions.aggregate([
+            {"$match": {"business_id": b["id"], "type": TransactionType.INCOME}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        expenses = await db.transactions.aggregate([
+            {"$match": {"business_id": b["id"], "type": TransactionType.EXPENSE}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        salaries = await db.transactions.aggregate([
+            {"$match": {"business_id": b["id"], "type": TransactionType.SALARY}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        taxes = await db.tax_notices.aggregate([
+            {"$match": {"business_id": b["id"]}},
+            {"$group": {"_id": None, "total": {"$sum": "$tax_amount"}}}
+        ]).to_list(1)
+        
+        transactions_count = await db.transactions.count_documents({"business_id": b["id"]})
+        employees_count = await db.users.count_documents({"business_id": b["id"], "role": UserRole.EMPLOYEE})
+        
+        total_income = income[0]["total"] if income else 0.0
+        total_expenses = expenses[0]["total"] if expenses else 0.0
+        total_salaries = salaries[0]["total"] if salaries else 0.0
+        total_taxes = taxes[0]["total"] if taxes else 0.0
+        
+        result.append({
+            "id": b["id"],
+            "name": b["name"],
+            "owner_name": b["owner_name"],
+            "created_at": b["created_at"],
+            "total_income": total_income,
+            "total_expenses": total_expenses,
+            "total_salaries": total_salaries,
+            "gross_profit": total_income - total_expenses - total_salaries,
+            "total_taxes_paid": total_taxes,
+            "transactions_count": transactions_count,
+            "employees_count": employees_count
+        })
+    
+    # Calculate totals
+    totals = {
+        "total_businesses": len(result),
+        "total_income": sum(r["total_income"] for r in result),
+        "total_expenses": sum(r["total_expenses"] for r in result),
+        "total_salaries": sum(r["total_salaries"] for r in result),
+        "total_gross_profit": sum(r["gross_profit"] for r in result),
+        "total_taxes_paid": sum(r["total_taxes_paid"] for r in result),
+        "total_transactions": sum(r["transactions_count"] for r in result),
+        "total_employees": sum(r["employees_count"] for r in result)
+    }
+    
+    return {"businesses": result, "totals": totals}
+
+@api_router.get("/accounting/global/pdf")
+async def export_global_accounting_pdf(admin: dict = Depends(require_admin)):
+    """Export global accounting as PDF"""
+    # Get data
+    accounting_data = await get_global_accounting(admin)
+    businesses = accounting_data["businesses"]
+    totals = accounting_data["totals"]
+    
+    # Generate PDF
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1.5*cm, bottomMargin=1.5*cm, leftMargin=1*cm, rightMargin=1*cm)
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, alignment=TA_CENTER, spaceAfter=20)
+    subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=10, alignment=TA_CENTER, textColor=colors.grey)
+    
+    elements = []
+    
+    # Header
+    elements.append(Paragraph("GOUVERNEMENT - PORTAIL FISCAL", subtitle_style))
+    elements.append(Paragraph("COMPTABILITÉ GLOBALE", title_style))
+    elements.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y %H:%M')}", subtitle_style))
+    elements.append(Spacer(1, 20))
+    
+    def format_currency(amount):
+        return f"${amount:,.0f}".replace(',', ' ')
+    
+    # Summary table
+    summary_data = [
+        ['Statistiques globales', ''],
+        ['Nombre d\'entreprises', str(totals['total_businesses'])],
+        ['Nombre d\'employés', str(totals['total_employees'])],
+        ['Chiffre d\'affaires total', format_currency(totals['total_income'])],
+        ['Dépenses totales', format_currency(totals['total_expenses'])],
+        ['Salaires totaux', format_currency(totals['total_salaries'])],
+        ['Bénéfice brut total', format_currency(totals['total_gross_profit'])],
+        ['Impôts collectés', format_currency(totals['total_taxes_paid'])],
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[10*cm, 5*cm])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0ea5e9')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#334155')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 30))
+    
+    # Businesses detail table
+    elements.append(Paragraph("Détail par entreprise", styles['Heading2']))
+    elements.append(Spacer(1, 10))
+    
+    biz_data = [['Entreprise', 'CA', 'Dépenses', 'Salaires', 'Bénéfice', 'Impôts']]
+    for b in businesses:
+        biz_data.append([
+            b['name'][:20],
+            format_currency(b['total_income']),
+            format_currency(b['total_expenses']),
+            format_currency(b['total_salaries']),
+            format_currency(b['gross_profit']),
+            format_currency(b['total_taxes_paid'])
+        ])
+    
+    biz_table = Table(biz_data, colWidths=[4*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+    biz_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#334155')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+    ]))
+    elements.append(biz_table)
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    filename = f"comptabilite_globale_{datetime.now().strftime('%Y%m%d')}.pdf"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 # =============================================================================
 # STATS/DASHBOARD ROUTES
 # =============================================================================
