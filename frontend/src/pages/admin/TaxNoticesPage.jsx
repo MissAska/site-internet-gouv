@@ -223,19 +223,19 @@ const TaxNoticesPage = () => {
           <div className="flex items-center justify-center h-64">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : notices.length === 0 ? (
+        ) : filteredAndSortedNotices.length === 0 ? (
           <Card className="border-border bg-card">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Aucun avis d'impôt généré</p>
+              <p className="text-muted-foreground">Aucun avis d'impôt</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Cliquez sur "Générer les avis" pour créer les premiers avis
+                {notices.length > 0 ? 'Modifiez les filtres pour voir plus de résultats' : 'Cliquez sur "Générer les avis" pour créer les premiers avis'}
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {notices.map((notice) => (
+            {filteredAndSortedNotices.map((notice) => (
               <Card key={notice.id} className="border-border bg-card overflow-hidden">
                 {/* Tax Notice Header - Paper style */}
                 <div className="bg-gradient-to-b from-slate-800 to-slate-900 p-4 border-b border-border">
