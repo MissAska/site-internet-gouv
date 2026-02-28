@@ -113,7 +113,7 @@ const LoginPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="votre@eyefinds.entreprise.info"
+                  placeholder="nom@eyefinds.nomdelentreprise.info"
                   className="bg-input border-border focus:border-primary"
                   required
                   data-testid="login-email-input"
