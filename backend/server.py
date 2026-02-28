@@ -74,6 +74,7 @@ class UserResponse(BaseModel):
     name: str
     role: UserRole
     business_id: Optional[str] = None
+    permissions: Optional[dict] = None
     created_at: str
 
 class TokenResponse(BaseModel):
