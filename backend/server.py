@@ -122,6 +122,8 @@ class TransactionCreate(BaseModel):
     amount: float
     description: str
     employee_id: Optional[str] = None
+    expense_category: Optional[str] = None  # For expenses: category
+    expense_details: Optional[str] = None   # For expenses: detailed justification
 
 class TransactionResponse(BaseModel):
     id: str
@@ -131,6 +133,8 @@ class TransactionResponse(BaseModel):
     description: str
     employee_id: Optional[str] = None
     employee_name: Optional[str] = None
+    expense_category: Optional[str] = None
+    expense_details: Optional[str] = None
     created_at: str
     created_by: str
 
