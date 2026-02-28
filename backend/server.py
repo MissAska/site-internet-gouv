@@ -295,6 +295,176 @@ async def init_admin():
     return {"message": "Admin créé", "email": "admin@gouvernement.rp", "password": "admin123"}
 
 # =============================================================================
+# USER MANAGEMENT ROUTES (Admin)
+# =============================================================================
+
+class AdminUserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    salary: Optional[float] = None
+
+class FullUserResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: str
+    business_id: Optional[str] = None
+    business_name: Optional[str] = None
+    salary: Optional[float] = None
+    created_at: str
+
+@api_router.get("/admin/users", response_model=List[FullUserResponse])
+async def get_all_users(admin: dict = Depends(require_admin)):
+    """Get all users in the system"""
+    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    
+    result = []
+    for user in users:
+        business_name = None
+        if user.get("business_id"):
+            business = await db.businesses.find_one({"id": user["business_id"]}, {"_id": 0})
+            if business:
+                business_name = business["name"]
+        
+        result.append(FullUserResponse(
+            id=user["id"],
+            email=user["email"],
+            name=user["name"],
+            role=user["role"],
+            business_id=user.get("business_id"),
+            business_name=business_name,
+            salary=user.get("salary"),
+            created_at=user["created_at"]
+        ))
+    
+    return result
+
+@api_router.post("/admin/users", response_model=FullUserResponse)
+async def create_admin_user(data: AdminUserCreate, admin: dict = Depends(require_admin)):
+    """Create a new admin/government user"""
+    existing = await db.users.find_one({"email": data.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+    
+    user_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    user_doc = {
+        "id": user_id,
+        "email": data.email,
+        "password": hash_password(data.password),
+        "name": data.name,
+        "role": UserRole.ADMIN,
+        "business_id": None,
+        "created_at": now
+    }
+    await db.users.insert_one(user_doc)
+    
+    return FullUserResponse(
+        id=user_id,
+        email=data.email,
+        name=data.name,
+        role=UserRole.ADMIN,
+        business_id=None,
+        business_name=None,
+        salary=None,
+        created_at=now
+    )
+
+@api_router.put("/admin/users/{user_id}", response_model=FullUserResponse)
+async def update_user(user_id: str, data: UserUpdate, admin: dict = Depends(require_admin)):
+    """Update any user (admin only)"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    update_data = {}
+    if data.name:
+        update_data["name"] = data.name
+    if data.email:
+        # Check if email already used by another user
+        existing = await db.users.find_one({"email": data.email, "id": {"$ne": user_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+        update_data["email"] = data.email
+    if data.password:
+        update_data["password"] = hash_password(data.password)
+    if data.salary is not None:
+        update_data["salary"] = data.salary
+    
+    if update_data:
+        await db.users.update_one({"id": user_id}, {"$set": update_data})
+        
+        # Also update owner_name in business if this is a patron
+        if data.name and user["role"] == UserRole.PATRON and user.get("business_id"):
+            await db.businesses.update_one(
+                {"owner_id": user_id},
+                {"$set": {"owner_name": data.name}}
+            )
+    
+    # Get updated user
+    updated = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    
+    business_name = None
+    if updated.get("business_id"):
+        business = await db.businesses.find_one({"id": updated["business_id"]}, {"_id": 0})
+        if business:
+            business_name = business["name"]
+    
+    return FullUserResponse(
+        id=updated["id"],
+        email=updated["email"],
+        name=updated["name"],
+        role=updated["role"],
+        business_id=updated.get("business_id"),
+        business_name=business_name,
+        salary=updated.get("salary"),
+        created_at=updated["created_at"]
+    )
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
+    """Delete any user (admin only)"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Prevent deleting yourself
+    if user_id == admin["id"]:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas supprimer votre propre compte")
+    
+    # If deleting a patron, also delete their business
+    if user["role"] == UserRole.PATRON and user.get("business_id"):
+        business_id = user["business_id"]
+        # Delete all employees of this business
+        await db.users.delete_many({"business_id": business_id, "role": UserRole.EMPLOYEE})
+        # Delete all transactions
+        await db.transactions.delete_many({"business_id": business_id})
+        # Delete all tax notices
+        await db.tax_notices.delete_many({"business_id": business_id})
+        # Delete the business
+        await db.businesses.delete_one({"id": business_id})
+    
+    await db.users.delete_one({"id": user_id})
+    return {"message": "Utilisateur supprimé"}
+
+@api_router.put("/admin/change-password")
+async def change_admin_password(current_password: str, new_password: str, admin: dict = Depends(require_admin)):
+    """Change own password"""
+    user = await db.users.find_one({"id": admin["id"]})
+    if not verify_password(current_password, user["password"]):
+        raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    
+    await db.users.update_one({"id": admin["id"]}, {"$set": {"password": hash_password(new_password)}})
+    return {"message": "Mot de passe modifié avec succès"}
+
+# =============================================================================
 # BUSINESS ROUTES
 # =============================================================================
 
