@@ -127,9 +127,6 @@ const TaxNoticesPage = () => {
   };
 
   const handleDeleteNotice = async (noticeId, businessName) => {
-    if (!window.confirm(`Supprimer l'avis d'impôt de "${businessName}" ?`)) {
-      return;
-    }
     try {
       await axios.delete(`${API}/tax-notices/${noticeId}`);
       toast.success('Avis d\'impôt supprimé');
