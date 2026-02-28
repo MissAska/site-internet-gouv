@@ -667,6 +667,16 @@ async def get_business_tax_notices(business_id: str, user: dict = Depends(get_cu
     notices = await db.tax_notices.find({"business_id": business_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return [TaxNoticeResponse(**n) for n in notices]
 
+@api_router.delete("/tax-notices/{notice_id}")
+async def delete_tax_notice(notice_id: str, admin: dict = Depends(require_admin)):
+    """Delete a tax notice (admin only)"""
+    notice = await db.tax_notices.find_one({"id": notice_id})
+    if not notice:
+        raise HTTPException(status_code=404, detail="Avis d'impôt non trouvé")
+    
+    await db.tax_notices.delete_one({"id": notice_id})
+    return {"message": "Avis d'impôt supprimé"}
+
 # =============================================================================
 # STATS/DASHBOARD ROUTES
 # =============================================================================
