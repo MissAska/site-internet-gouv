@@ -27,6 +27,17 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+const EXPENSE_CATEGORIES = [
+  { value: 'fournitures', label: 'Fournitures et matériel' },
+  { value: 'vehicules', label: 'Véhicules et transport' },
+  { value: 'loyer', label: 'Loyer et charges' },
+  { value: 'maintenance', label: 'Maintenance et réparations' },
+  { value: 'marketing', label: 'Marketing et publicité' },
+  { value: 'services', label: 'Services externes' },
+  { value: 'equipement', label: 'Équipement professionnel' },
+  { value: 'autre', label: 'Autre' },
+];
+
 const CashRegisterPage = () => {
   const { user, isPatron, isEmployee } = useAuth();
   const [employees, setEmployees] = useState([]);
@@ -36,7 +47,9 @@ const CashRegisterPage = () => {
     type: 'income',
     amount: '',
     description: '',
-    employee_id: ''
+    employee_id: '',
+    expense_category: '',
+    expense_details: ''
   });
 
   useEffect(() => {
