@@ -753,6 +753,52 @@ async def delete_employee(employee_id: str, user: dict = Depends(require_patron_
     await db.users.delete_one({"id": employee_id})
     return {"message": "Employé supprimé"}
 
+class EmployeeUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    salary: Optional[float] = None
+    permissions: Optional[EmployeePermissions] = None
+
+@api_router.put("/employees/{employee_id}", response_model=EmployeeResponse)
+async def update_employee(employee_id: str, data: EmployeeUpdate, user: dict = Depends(require_patron_or_admin)):
+    employee = await db.users.find_one({"id": employee_id, "role": UserRole.EMPLOYEE})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employé non trouvé")
+    
+    if user["role"] != UserRole.ADMIN and employee["business_id"] != user["business_id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    update_data = {}
+    if data.name:
+        update_data["name"] = data.name
+    if data.email:
+        existing = await db.users.find_one({"email": data.email, "id": {"$ne": employee_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Cet email est déjà utilisé")
+        update_data["email"] = data.email
+    if data.password:
+        update_data["password"] = hash_password(data.password)
+    if data.salary is not None:
+        update_data["salary"] = data.salary
+    if data.permissions:
+        update_data["permissions"] = data.permissions.model_dump()
+    
+    if update_data:
+        await db.users.update_one({"id": employee_id}, {"$set": update_data})
+    
+    updated = await db.users.find_one({"id": employee_id}, {"_id": 0, "password": 0})
+    
+    return EmployeeResponse(
+        id=updated["id"],
+        email=updated["email"],
+        name=updated["name"],
+        business_id=updated["business_id"],
+        salary=updated.get("salary", 0),
+        permissions=updated.get("permissions"),
+        created_at=updated["created_at"]
+    )
+
 # =============================================================================
 # TRANSACTION ROUTES (CASH REGISTER)
 # =============================================================================
