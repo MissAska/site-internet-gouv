@@ -29,15 +29,19 @@ const formatCurrency = (amount) => {
 };
 
 const PERMISSIONS_CONFIG = [
-  { key: 'cash_register', label: 'Caisse enregistreuse', description: 'Enregistrer des transactions' },
-  { key: 'view_transactions', label: 'Voir les transactions', description: 'Consulter l\'historique des transactions' },
-  { key: 'view_accounting', label: 'Voir la comptabilité', description: 'Accéder aux données comptables' },
-  { key: 'view_tax_notices', label: 'Voir les impôts', description: 'Consulter les avis d\'imposition' },
-  { key: 'manage_employees', label: 'Gérer les employés', description: 'Ajouter/modifier des employés' },
+  { key: 'cash_register', label: 'Caisse (revenus)', description: 'Enregistrer des revenus' },
+  { key: 'record_expenses', label: 'Dépenses', description: 'Enregistrer des dépenses' },
+  { key: 'record_salaries', label: 'Salaires', description: 'Enregistrer des salaires' },
+  { key: 'view_transactions', label: 'Voir transactions', description: 'Consulter l\'historique' },
+  { key: 'view_accounting', label: 'Comptabilité', description: 'Accéder aux données comptables' },
+  { key: 'view_tax_notices', label: 'Impôts', description: 'Consulter les avis d\'imposition' },
+  { key: 'manage_employees', label: 'Gérer employés', description: 'Ajouter/modifier des employés' },
 ];
 
 const DEFAULT_PERMISSIONS = {
   cash_register: true,
+  record_expenses: false,
+  record_salaries: false,
   view_transactions: false,
   view_accounting: false,
   view_tax_notices: false,
