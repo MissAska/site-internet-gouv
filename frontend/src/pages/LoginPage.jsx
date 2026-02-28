@@ -159,7 +159,7 @@ const LoginPage = () => {
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground mt-6 uppercase tracking-wider">
-          Système de gestion fiscale - GTA RP
+          Système de gestion fiscale
         </p>
       </div>
     </div>
