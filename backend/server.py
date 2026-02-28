@@ -816,6 +816,22 @@ async def create_transaction(data: TransactionCreate, user: dict = Depends(get_c
     if not business_id:
         raise HTTPException(status_code=400, detail="Utilisateur non associé à une entreprise")
     
+    # Check permissions for employees
+    if user["role"] == UserRole.EMPLOYEE:
+        permissions = user.get("permissions", {})
+        
+        # Check cash register permission for income
+        if data.type == TransactionType.INCOME and not permissions.get("cash_register", True):
+            raise HTTPException(status_code=403, detail="Vous n'avez pas la permission d'enregistrer des revenus")
+        
+        # Check expense permission
+        if data.type == TransactionType.EXPENSE and not permissions.get("record_expenses", False):
+            raise HTTPException(status_code=403, detail="Vous n'avez pas la permission d'enregistrer des dépenses")
+        
+        # Check salary permission
+        if data.type == TransactionType.SALARY and not permissions.get("record_salaries", False):
+            raise HTTPException(status_code=403, detail="Vous n'avez pas la permission d'enregistrer des salaires")
+    
     # Require expense details for expense transactions
     if data.type == TransactionType.EXPENSE:
         if not data.expense_category:
