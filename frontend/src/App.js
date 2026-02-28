@@ -138,6 +138,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/accounting"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <GlobalAccountingPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Business (Patron) Routes */}
       <Route
