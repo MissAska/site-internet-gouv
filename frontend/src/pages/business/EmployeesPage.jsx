@@ -130,7 +130,7 @@ const EmployeesPage = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="employe@entreprise.rp"
+                    placeholder="employe@eyefinds.entreprise.info"
                     className="bg-input border-border"
                     required
                     data-testid="employee-email-input"

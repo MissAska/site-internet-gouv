@@ -169,7 +169,7 @@ const BusinessesPage = () => {
                     type="email"
                     value={formData.owner_email}
                     onChange={(e) => setFormData({ ...formData, owner_email: e.target.value })}
-                    placeholder="patron@entreprise.rp"
+                    placeholder="patron@eyefinds.entreprise.info"
                     className="bg-input border-border"
                     required
                     data-testid="owner-email-input"

@@ -292,7 +292,7 @@ const UsersManagementPage = () => {
                       type="email"
                       value={createForm.email}
                       onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                      placeholder="agent@gouvernement.rp"
+                      placeholder="agent@eyefinds.entreprise.info"
                       className="bg-input border-border"
                       required
                       data-testid="admin-email-input"
