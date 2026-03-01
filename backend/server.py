@@ -1126,36 +1126,58 @@ async def get_global_accounting(admin: dict = Depends(require_admin)):
     """Get global accounting for all businesses"""
     businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
     
+    if not businesses:
+        return {"businesses": [], "totals": {
+            "total_businesses": 0, "total_income": 0, "total_expenses": 0,
+            "total_salaries": 0, "total_gross_profit": 0, "total_taxes_paid": 0,
+            "total_transactions": 0, "total_employees": 0
+        }}
+    
+    biz_ids = [b["id"] for b in businesses]
+    
+    # Batch: single aggregation for all transaction totals
+    tx_totals = await db.transactions.aggregate([
+        {"$match": {"business_id": {"$in": biz_ids}}},
+        {"$group": {"_id": {"business_id": "$business_id", "type": "$type"}, "total": {"$sum": "$amount"}, "count": {"$sum": 1}}}
+    ]).to_list(10000)
+    
+    # Batch: tax totals
+    tax_totals = await db.tax_notices.aggregate([
+        {"$match": {"business_id": {"$in": biz_ids}}},
+        {"$group": {"_id": "$business_id", "total": {"$sum": "$tax_amount"}}}
+    ]).to_list(1000)
+    
+    # Batch: employee counts
+    emp_counts = await db.users.aggregate([
+        {"$match": {"role": UserRole.EMPLOYEE, "business_id": {"$in": biz_ids}}},
+        {"$group": {"_id": "$business_id", "count": {"$sum": 1}}}
+    ]).to_list(1000)
+    
+    # Build lookup maps
+    tx_map = {}
+    tx_count_map = {}
+    for t in tx_totals:
+        biz_id = t["_id"]["business_id"]
+        tx_type = t["_id"]["type"]
+        if biz_id not in tx_map:
+            tx_map[biz_id] = {}
+            tx_count_map[biz_id] = 0
+        tx_map[biz_id][tx_type] = t["total"]
+        tx_count_map[biz_id] += t["count"]
+    
+    tax_map = {t["_id"]: t["total"] for t in tax_totals}
+    emp_map = {e["_id"]: e["count"] for e in emp_counts}
+    
     result = []
     for b in businesses:
-        # Calculate totals
-        income = await db.transactions.aggregate([
-            {"$match": {"business_id": b["id"], "type": TransactionType.INCOME}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(1)
-        expenses = await db.transactions.aggregate([
-            {"$match": {"business_id": b["id"], "type": TransactionType.EXPENSE}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(1)
-        salaries = await db.transactions.aggregate([
-            {"$match": {"business_id": b["id"], "type": TransactionType.SALARY}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(1)
-        taxes = await db.tax_notices.aggregate([
-            {"$match": {"business_id": b["id"]}},
-            {"$group": {"_id": None, "total": {"$sum": "$tax_amount"}}}
-        ]).to_list(1)
-        
-        transactions_count = await db.transactions.count_documents({"business_id": b["id"]})
-        employees_count = await db.users.count_documents({"business_id": b["id"], "role": UserRole.EMPLOYEE})
-        
-        total_income = income[0]["total"] if income else 0.0
-        total_expenses = expenses[0]["total"] if expenses else 0.0
-        total_salaries = salaries[0]["total"] if salaries else 0.0
-        total_taxes = taxes[0]["total"] if taxes else 0.0
+        bid = b["id"]
+        totals = tx_map.get(bid, {})
+        total_income = totals.get(TransactionType.INCOME, 0.0)
+        total_expenses = totals.get(TransactionType.EXPENSE, 0.0)
+        total_salaries = totals.get(TransactionType.SALARY, 0.0)
         
         result.append({
-            "id": b["id"],
+            "id": bid,
             "name": b["name"],
             "owner_name": b["owner_name"],
             "created_at": b["created_at"],
@@ -1163,12 +1185,11 @@ async def get_global_accounting(admin: dict = Depends(require_admin)):
             "total_expenses": total_expenses,
             "total_salaries": total_salaries,
             "gross_profit": total_income - total_expenses - total_salaries,
-            "total_taxes_paid": total_taxes,
-            "transactions_count": transactions_count,
-            "employees_count": employees_count
+            "total_taxes_paid": tax_map.get(bid, 0.0),
+            "transactions_count": tx_count_map.get(bid, 0),
+            "employees_count": emp_map.get(bid, 0)
         })
     
-    # Calculate totals
     totals = {
         "total_businesses": len(result),
         "total_income": sum(r["total_income"] for r in result),
