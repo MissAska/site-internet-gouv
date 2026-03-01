@@ -294,7 +294,7 @@ async def get_me(user: dict = Depends(get_current_user)):
 @api_router.post("/admin/init")
 async def init_admin():
     """Initialize the admin account if it doesn't exist"""
-    existing = await db.users.find_one({"role": UserRole.ADMIN})
+    existing = await db.users.find_one({"role": UserRole.ADMIN}, {"_id": 0, "email": 1})
     if existing:
         return {"message": "Admin déjà créé", "email": existing["email"]}
     
@@ -341,26 +341,24 @@ async def get_all_users(admin: dict = Depends(require_admin)):
     """Get all users in the system"""
     users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
     
-    result = []
-    for user in users:
-        business_name = None
-        if user.get("business_id"):
-            business = await db.businesses.find_one({"id": user["business_id"]}, {"_id": 0})
-            if business:
-                business_name = business["name"]
-        
-        result.append(FullUserResponse(
+    # Batch load businesses to avoid N+1
+    business_ids = list(set(u.get("business_id") for u in users if u.get("business_id")))
+    businesses = await db.businesses.find({"id": {"$in": business_ids}}, {"_id": 0, "id": 1, "name": 1}).to_list(1000) if business_ids else []
+    business_map = {b["id"]: b["name"] for b in businesses}
+    
+    return [
+        FullUserResponse(
             id=user["id"],
             email=user["email"],
             name=user["name"],
             role=user["role"],
             business_id=user.get("business_id"),
-            business_name=business_name,
+            business_name=business_map.get(user.get("business_id")),
             salary=user.get("salary"),
             created_at=user["created_at"]
-        ))
-    
-    return result
+        )
+        for user in users
+    ]
 
 @api_router.post("/admin/users", response_model=FullUserResponse)
 async def create_admin_user(data: AdminUserCreate, admin: dict = Depends(require_admin)):
@@ -397,7 +395,7 @@ async def create_admin_user(data: AdminUserCreate, admin: dict = Depends(require
 @api_router.put("/admin/users/{user_id}", response_model=FullUserResponse)
 async def update_user(user_id: str, data: UserUpdate, admin: dict = Depends(require_admin)):
     """Update any user (admin only)"""
-    user = await db.users.find_one({"id": user_id})
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     
@@ -448,7 +446,7 @@ async def update_user(user_id: str, data: UserUpdate, admin: dict = Depends(requ
 @api_router.delete("/admin/users/{user_id}")
 async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
     """Delete any user (admin only)"""
-    user = await db.users.find_one({"id": user_id})
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     
