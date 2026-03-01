@@ -472,7 +472,7 @@ async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
 @api_router.put("/admin/change-password")
 async def change_admin_password(current_password: str, new_password: str, admin: dict = Depends(require_admin)):
     """Change own password"""
-    user = await db.users.find_one({"id": admin["id"]})
+    user = await db.users.find_one({"id": admin["id"]}, {"_id": 0})
     if not verify_password(current_password, user["password"]):
         raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
     
@@ -601,7 +601,7 @@ async def get_business(business_id: str, user: dict = Depends(get_current_user))
 
 @api_router.delete("/businesses/{business_id}")
 async def delete_business(business_id: str, admin: dict = Depends(require_admin)):
-    business = await db.businesses.find_one({"id": business_id})
+    business = await db.businesses.find_one({"id": business_id}, {"_id": 0})
     if not business:
         raise HTTPException(status_code=404, detail="Entreprise non trouvée")
     
@@ -615,7 +615,7 @@ async def delete_business(business_id: str, admin: dict = Depends(require_admin)
 
 @api_router.put("/businesses/{business_id}", response_model=BusinessResponse)
 async def update_business(business_id: str, data: BusinessUpdate, admin: dict = Depends(require_admin)):
-    business = await db.businesses.find_one({"id": business_id})
+    business = await db.businesses.find_one({"id": business_id}, {"_id": 0})
     if not business:
         raise HTTPException(status_code=404, detail="Entreprise non trouvée")
     
@@ -751,7 +751,7 @@ async def get_employees(user: dict = Depends(get_current_user)):
 
 @api_router.delete("/employees/{employee_id}")
 async def delete_employee(employee_id: str, user: dict = Depends(require_patron_or_admin)):
-    employee = await db.users.find_one({"id": employee_id, "role": UserRole.EMPLOYEE})
+    employee = await db.users.find_one({"id": employee_id, "role": UserRole.EMPLOYEE}, {"_id": 0})
     if not employee:
         raise HTTPException(status_code=404, detail="Employé non trouvé")
     
