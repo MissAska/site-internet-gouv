@@ -536,34 +536,37 @@ async def get_businesses(user: dict = Depends(get_current_user)):
     else:
         businesses = await db.businesses.find({"id": user["business_id"]}, {"_id": 0}).to_list(1)
     
-    result = []
-    for b in businesses:
-        # Calculate totals
-        income = await db.transactions.aggregate([
-            {"$match": {"business_id": b["id"], "type": TransactionType.INCOME}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(1)
-        expenses = await db.transactions.aggregate([
-            {"$match": {"business_id": b["id"], "type": TransactionType.EXPENSE}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(1)
-        salaries = await db.transactions.aggregate([
-            {"$match": {"business_id": b["id"], "type": TransactionType.SALARY}},
-            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-        ]).to_list(1)
-        
-        result.append(BusinessResponse(
+    if not businesses:
+        return []
+    
+    # Batch: single aggregation for all transaction totals
+    biz_ids = [b["id"] for b in businesses]
+    totals_agg = await db.transactions.aggregate([
+        {"$match": {"business_id": {"$in": biz_ids}}},
+        {"$group": {"_id": {"business_id": "$business_id", "type": "$type"}, "total": {"$sum": "$amount"}}}
+    ]).to_list(10000)
+    
+    totals_map = {}
+    for t in totals_agg:
+        biz_id = t["_id"]["business_id"]
+        tx_type = t["_id"]["type"]
+        if biz_id not in totals_map:
+            totals_map[biz_id] = {}
+        totals_map[biz_id][tx_type] = t["total"]
+    
+    return [
+        BusinessResponse(
             id=b["id"],
             name=b["name"],
             owner_id=b["owner_id"],
             owner_name=b["owner_name"],
             created_at=b["created_at"],
-            total_income=income[0]["total"] if income else 0.0,
-            total_expenses=expenses[0]["total"] if expenses else 0.0,
-            total_salaries=salaries[0]["total"] if salaries else 0.0
-        ))
-    
-    return result
+            total_income=totals_map.get(b["id"], {}).get(TransactionType.INCOME, 0.0),
+            total_expenses=totals_map.get(b["id"], {}).get(TransactionType.EXPENSE, 0.0),
+            total_salaries=totals_map.get(b["id"], {}).get(TransactionType.SALARY, 0.0)
+        )
+        for b in businesses
+    ]
 
 @api_router.get("/businesses/{business_id}", response_model=BusinessResponse)
 async def get_business(business_id: str, user: dict = Depends(get_current_user)):
@@ -667,14 +670,15 @@ async def get_all_expenses(admin: dict = Depends(require_admin)):
         {"_id": 0}
     ).sort("created_at", -1).to_list(1000)
     
-    # Add business name to each expense
-    result = []
-    for expense in expenses:
-        business = await db.businesses.find_one({"id": expense["business_id"]}, {"_id": 0})
-        expense["business_name"] = business["name"] if business else "Inconnu"
-        result.append(expense)
+    # Batch load businesses to avoid N+1
+    business_ids = list(set(e["business_id"] for e in expenses))
+    businesses = await db.businesses.find({"id": {"$in": business_ids}}, {"_id": 0, "id": 1, "name": 1}).to_list(1000) if business_ids else []
+    business_map = {b["id"]: b["name"] for b in businesses}
     
-    return result
+    for expense in expenses:
+        expense["business_name"] = business_map.get(expense["business_id"], "Inconnu")
+    
+    return expenses
 
 # =============================================================================
 # EMPLOYEE ROUTES
