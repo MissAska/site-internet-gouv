@@ -422,6 +422,7 @@ const EmployeesPage = () => {
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                   className="bg-input border-border"
                   required
+                  data-testid="edit-employee-name-input"
                 />
               </div>
               <div className="space-y-2">
@@ -432,6 +433,7 @@ const EmployeesPage = () => {
                   onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                   className="bg-input border-border"
                   required
+                  data-testid="edit-employee-email-input"
                 />
               </div>
               <div className="space-y-2">
@@ -442,6 +444,7 @@ const EmployeesPage = () => {
                   onChange={(e) => setEditData({ ...editData, password: e.target.value })}
                   placeholder="••••••••"
                   className="bg-input border-border"
+                  data-testid="edit-employee-password-input"
                 />
               </div>
               <div className="space-y-2">
@@ -452,6 +455,7 @@ const EmployeesPage = () => {
                   onChange={(e) => setEditData({ ...editData, salary: parseFloat(e.target.value) || 0 })}
                   className="bg-input border-border"
                   min="0"
+                  data-testid="edit-employee-salary-input"
                 />
               </div>
 
@@ -492,7 +496,7 @@ const EmployeesPage = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full uppercase tracking-wider">
+              <Button type="submit" className="w-full uppercase tracking-wider" data-testid="submit-edit-employee-btn">
                 Enregistrer les modifications
               </Button>
             </form>
