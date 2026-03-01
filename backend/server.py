@@ -770,7 +770,7 @@ class EmployeeUpdate(BaseModel):
 
 @api_router.put("/employees/{employee_id}", response_model=EmployeeResponse)
 async def update_employee(employee_id: str, data: EmployeeUpdate, user: dict = Depends(require_patron_or_admin)):
-    employee = await db.users.find_one({"id": employee_id, "role": UserRole.EMPLOYEE})
+    employee = await db.users.find_one({"id": employee_id, "role": UserRole.EMPLOYEE}, {"_id": 0})
     if not employee:
         raise HTTPException(status_code=404, detail="Employé non trouvé")
     
@@ -863,6 +863,7 @@ async def create_transaction(data: TransactionCreate, user: dict = Depends(get_c
         "created_by": user["id"]
     }
     await db.transactions.insert_one(transaction_doc)
+    transaction_doc.pop("_id", None)
     
     return TransactionResponse(**transaction_doc)
 
@@ -994,6 +995,7 @@ async def generate_tax_notices(admin: dict = Depends(require_admin)):
             "created_at": now.isoformat()
         }
         await db.tax_notices.insert_one(notice_doc)
+        notice_doc.pop("_id", None)
         notices.append(TaxNoticeResponse(**notice_doc))
     
     return notices
@@ -1018,7 +1020,7 @@ async def get_business_tax_notices(business_id: str, user: dict = Depends(get_cu
 @api_router.delete("/tax-notices/{notice_id}")
 async def delete_tax_notice(notice_id: str, admin: dict = Depends(require_admin)):
     """Delete a tax notice (admin only)"""
-    notice = await db.tax_notices.find_one({"id": notice_id})
+    notice = await db.tax_notices.find_one({"id": notice_id}, {"_id": 0})
     if not notice:
         raise HTTPException(status_code=404, detail="Avis d'impôt non trouvé")
     
