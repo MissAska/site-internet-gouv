@@ -228,6 +228,7 @@ const UsersManagementPage = () => {
                       onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
                       className="bg-input border-border"
                       required
+                      data-testid="current-password-input"
                     />
                   </div>
                   <div className="space-y-2">
@@ -238,6 +239,7 @@ const UsersManagementPage = () => {
                       onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
                       className="bg-input border-border"
                       required
+                      data-testid="new-password-input"
                     />
                   </div>
                   <div className="space-y-2">
@@ -248,9 +250,10 @@ const UsersManagementPage = () => {
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
                       className="bg-input border-border"
                       required
+                      data-testid="confirm-password-input"
                     />
                   </div>
-                  <Button type="submit" className="w-full uppercase tracking-wider">
+                  <Button type="submit" className="w-full uppercase tracking-wider" data-testid="submit-change-password-btn">
                     Changer le mot de passe
                   </Button>
                 </form>
@@ -463,6 +466,7 @@ const UsersManagementPage = () => {
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   className="bg-input border-border"
                   required
+                  data-testid="edit-user-name-input"
                 />
               </div>
               <div className="space-y-2">
@@ -473,6 +477,7 @@ const UsersManagementPage = () => {
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   className="bg-input border-border"
                   required
+                  data-testid="edit-user-email-input"
                 />
               </div>
               <div className="space-y-2">
@@ -483,6 +488,7 @@ const UsersManagementPage = () => {
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                   placeholder="••••••••"
                   className="bg-input border-border"
+                  data-testid="edit-user-password-input"
                 />
               </div>
               {editingUser?.role === 'employee' && (
@@ -497,7 +503,7 @@ const UsersManagementPage = () => {
                   />
                 </div>
               )}
-              <Button type="submit" className="w-full uppercase tracking-wider">
+              <Button type="submit" className="w-full uppercase tracking-wider" data-testid="submit-edit-user-btn">
                 Enregistrer
               </Button>
             </form>

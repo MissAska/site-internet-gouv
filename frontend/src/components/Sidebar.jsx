@@ -118,6 +118,7 @@ const Sidebar = () => {
                       : 'text-muted-foreground hover:bg-secondary hover:text-foreground border-l-4 border-transparent'
                   }`
                 }
+                data-testid={`nav-link-${link.to.replace(/\//g, '-').replace(/^-/, '')}`}
               >
                 <link.icon className="w-5 h-5" />
                 <span>{link.label}</span>
