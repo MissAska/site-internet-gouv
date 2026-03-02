@@ -92,16 +92,19 @@ class BusinessCreate(BaseModel):
     owner_email: EmailStr
     owner_name: str
     owner_password: str
+    business_type: str = "standard"
 
 class BusinessUpdate(BaseModel):
     name: Optional[str] = None
     owner_name: Optional[str] = None
+    business_type: Optional[str] = None
 
 class BusinessResponse(BaseModel):
     id: str
     name: str
     owner_id: str
     owner_name: str
+    business_type: str = "standard"
     created_at: str
     total_income: float = 0.0
     total_expenses: float = 0.0
