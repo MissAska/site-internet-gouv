@@ -340,15 +340,35 @@ async def weekly_scheduler_task():
             if not brackets:
                 brackets = DEFAULT_TAX_BRACKETS
             
-            period_end = datetime.now(timezone.utc)
-            period_start = get_current_week_start()
-            
             for business in businesses:
                 biz_id = business["id"]
                 income_agg = await db.transactions.aggregate([
                     {"$match": {"business_id": biz_id, "type": TransactionType.INCOME, "created_at": {"$gte": period_start.isoformat(), "$lte": period_end.isoformat()}}},
                     {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
                 ]).to_list(1)
+                expenses_agg = await db.transactions.aggregate([
+                    {"$match": {"business_id": biz_id, "type": TransactionType.EXPENSE, "created_at": {"$gte": period_start.isoformat(), "$lte": period_end.isoformat()}}},
+                    {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+                ]).to_list(1)
+                salaries_agg = await db.transactions.aggregate([
+                    {"$match": {"business_id": biz_id, "type": TransactionType.SALARY, "created_at": {"$gte": period_start.isoformat(), "$lte": period_end.isoformat()}}},
+                    {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+                ]).to_list(1)
+                
+                gross_revenue = income_agg[0]["total"] if income_agg else 0.0
+                total_expenses = expenses_agg[0]["total"] if expenses_agg else 0.0
+                total_salaries = salaries_agg[0]["total"] if salaries_agg else 0.0
+                taxable_income = max(0, gross_revenue - total_expenses - total_salaries)
+                tax_rate, tax_amount = calculate_tax(taxable_income, brackets)
+                
+                notice_doc = {
+                    "id": str(uuid.uuid4()), "business_id": biz_id, "business_name": business["name"],
+                    "period_start": period_start.isoformat(), "period_end": period_end.isoformat(),
+                    "gross_revenue": gross_revenue, "total_expenses": total_expenses, "total_salaries": total_salaries,
+                    "taxable_income": taxable_income, "tax_rate": tax_rate, "tax_amount": tax_amount,
+                    "status": "unpaid", "created_at": period_end.isoformat()
+                }
+                await db.tax_notices.insert_one(notice_doc)
             
             logger.info("Auto weekly snapshots and tax notices completed")
             await asyncio.sleep(120)
