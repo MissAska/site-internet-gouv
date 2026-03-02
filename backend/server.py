@@ -327,9 +327,14 @@ async def weekly_scheduler_task():
             await asyncio.sleep(wait_seconds)
             
             logger.info("Running automatic weekly snapshots and tax notices...")
+            
+            # Capture period BEFORE snapshot (which resets)
+            period_start = await get_accounting_period_start()
+            period_end = datetime.now(timezone.utc)
+            
             await create_weekly_snapshots()
             
-            # Auto-generate tax notices
+            # Auto-generate tax notices using the captured period
             businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
             brackets = await db.tax_brackets.find({}, {"_id": 0}).to_list(100)
             if not brackets:
