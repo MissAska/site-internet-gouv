@@ -1156,6 +1156,10 @@ async def get_tax_notices(user: dict = Depends(get_current_user)):
         query["business_id"] = user["business_id"]
     
     notices = await db.tax_notices.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    # Ensure status field exists for old notices
+    for n in notices:
+        if "status" not in n:
+            n["status"] = "unpaid"
     return [TaxNoticeResponse(**n) for n in notices]
 
 @api_router.get("/tax-notices/business/{business_id}", response_model=List[TaxNoticeResponse])
