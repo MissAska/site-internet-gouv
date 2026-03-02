@@ -1,54 +1,63 @@
-# GTA RP - Portail Fiscal Eyefind
+# PRD - Eyefind Portail Fiscal
 
-## Problem Statement
-Site web fonctionnel pour GTA RP avec système de login JWT, caisses enregistreuses, gestion d'entreprises créables par admin gouvernement, comptabilité (CA, dépenses, salaires), et génération automatique d'avis d'impôts hebdomadaires le dimanche à 23h59.
+## Problème original
+Création d'un site web fonctionnel pour un serveur GTA RP avec un système de gestion d'entreprise, comptabilité et impôts.
+
+## Rôles utilisateurs
+- **Gouvernement (Admin)** : Crée les entreprises et comptes, voit tout, gère les impôts
+- **Patron** : Gère son entreprise, ses employés et sa comptabilité (semaine en cours uniquement)
+- **Employé** : Accède aux fonctionnalités autorisées par le patron (permissions granulaires)
+
+## Fonctionnalités implémentées
+
+### Authentification & Rôles
+- JWT auth avec 3 rôles (gouvernement, patron, employé)
+- Format email: `nom@eyefinds.nomentreprise.info`
+- Thème sombre Eyefind, interface en français
+
+### Gestion des entreprises
+- CRUD complet (admin)
+- Modification du nom d'entreprise
+
+### Gestion des employés
+- Création/modification/suppression par le patron
+- Permissions granulaires: caisse, dépenses, salaires, voir transactions, comptabilité, impôts, gérer employés
+
+### Comptabilité
+- Caisse enregistreuse: revenus, dépenses (avec catégorie+justification), salaires
+- Comptabilité globale visible par le gouvernement
+- **Comptabilité hebdomadaire**: les entreprises ne voient que la semaine en cours (depuis dimanche 00:00 UTC)
+- **Historique comptable**: snapshots hebdomadaires visibles uniquement par le gouvernement
+
+### Système fiscal
+- Génération d'avis d'impôts (manuelle + automatique chaque dimanche 23:59 UTC)
+- Calcul basé sur bénéfice brut avec barème de pourcentages
+- Minimum 5000$ même si bénéfice négatif
+- **Statut payé/non payé** toggleable par le gouvernement
+- Export PDF
+- Snapshot comptable créé à chaque génération
+
+### Gestion des comptes
+- Admin peut créer/modifier/supprimer tous les comptes
+- Changement de mot de passe admin
+
+## Stack technique
+- Backend: FastAPI + MongoDB (pymongo) + JWT
+- Frontend: React + Tailwind CSS + shadcn/ui
+- PDF: reportlab (backend)
 
 ## Architecture
-- **Backend**: FastAPI + MongoDB
-- **Frontend**: React + Tailwind CSS + Shadcn/UI
-- **Auth**: JWT avec bcrypt
-- **Style**: Thème sombre Eyefind GTA
+```
+/app/backend/server.py - API monolithique
+/app/frontend/src/pages/admin/ - Pages gouvernement
+/app/frontend/src/pages/business/ - Pages patron
+/app/frontend/src/pages/employee/ - Pages employé
+/app/frontend/src/pages/CashRegisterPage.jsx - Caisse partagée
+```
 
-## User Personas & Roles
-1. **Admin Gouvernement** - Crée entreprises, génère avis d'impôts, configure tranches fiscales
-2. **Patron** - Gère son entreprise, employés, transactions, voit comptabilité
-3. **Employé** - Accès caisse enregistreuse uniquement
+## Collections MongoDB
+- users, businesses, transactions, tax_notices, tax_brackets, accounting_snapshots
 
-## Core Requirements (Static)
-- [x] Authentification JWT
-- [x] Hiérarchie de rôles (Admin > Patron > Employé)
-- [x] Création d'entreprises avec compte patron automatique
-- [x] Caisse enregistreuse (revenus, dépenses, salaires)
-- [x] Comptabilité avec graphiques
-- [x] Génération avis d'impôts
-- [x] Tranches d'imposition configurables
-- [x] Minimum 5000$ d'impôts même en cas de bénéfice négatif
-
-## What's Been Implemented (28/02/2026)
-- Système complet d'authentification JWT
-- Dashboard Admin avec statistiques globales
-- CRUD Entreprises avec création automatique compte patron
-- CRUD Employés par entreprise
-- Caisse enregistreuse fonctionnelle
-- Page comptabilité avec graphiques Recharts
-- Génération et historique des avis d'impôts
-- Configuration des tranches fiscales
-- Thème Eyefind GTA (sombre, cyber-corporate)
-- Interface entièrement en français
-
-## Backlog
-### P0 - Critical
-- (Complété)
-
-### P1 - High Priority
-- Génération automatique dimanche 23h59 (scheduler)
-- Export PDF des avis d'impôts
-
-### P2 - Medium
-- Historique des modifications comptables
-- Notifications par email
-
-## Next Tasks
-1. Implémenter APScheduler pour génération auto dimanche 23h59
-2. Ajouter export PDF des avis d'impôts
-3. Dashboard patron amélioré avec plus de KPIs
+## Credentials de test
+- Admin: l.bennett@eyefinds.gouvernement.info / password
+- Patron: patron.test@lsc.rp / password
