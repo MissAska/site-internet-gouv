@@ -349,6 +349,19 @@ const BusinessesPage = () => {
                   data-testid="edit-owner-name-input"
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="uppercase tracking-wider text-xs">Type d'entreprise</Label>
+                <Select value={editData.business_type} onValueChange={v => setEditData({...editData, business_type: v})}>
+                  <SelectTrigger className="bg-input border-border" data-testid="edit-business-type-select">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="concessionnaire">Concessionnaire</SelectItem>
+                    <SelectItem value="dna">DN Automotive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Button type="submit" className="w-full uppercase tracking-wider" data-testid="submit-edit-btn">
                 Enregistrer les modifications
               </Button>
