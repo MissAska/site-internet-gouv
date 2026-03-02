@@ -1103,9 +1103,9 @@ async def generate_tax_notices(admin: dict = Depends(require_admin)):
     """Generate tax notices for all businesses and create accounting snapshots"""
     now = datetime.now(timezone.utc)
     period_end = now
-    period_start = get_current_week_start()
+    period_start = await get_accounting_period_start()
     
-    # Create accounting snapshots first
+    # Create accounting snapshots first (this also resets the period)
     await create_weekly_snapshots()
     
     businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
