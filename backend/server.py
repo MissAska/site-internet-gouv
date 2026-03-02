@@ -796,6 +796,7 @@ async def get_business(business_id: str, user: dict = Depends(get_current_user))
         name=business["name"],
         owner_id=business["owner_id"],
         owner_name=business["owner_name"],
+        business_type=business.get("business_type", "standard"),
         created_at=business["created_at"],
         total_income=income[0]["total"] if income else 0.0,
         total_expenses=expenses[0]["total"] if expenses else 0.0,
@@ -827,8 +828,9 @@ async def update_business(business_id: str, data: BusinessUpdate, admin: dict = 
         update_data["name"] = data.name
     if data.owner_name:
         update_data["owner_name"] = data.owner_name
-        # Also update the owner's name in users collection
         await db.users.update_one({"id": business["owner_id"]}, {"$set": {"name": data.owner_name}})
+    if data.business_type is not None:
+        update_data["business_type"] = data.business_type
     
     if update_data:
         await db.businesses.update_one({"id": business_id}, {"$set": update_data})
@@ -855,6 +857,7 @@ async def update_business(business_id: str, data: BusinessUpdate, admin: dict = 
         name=updated["name"],
         owner_id=updated["owner_id"],
         owner_name=updated["owner_name"],
+        business_type=updated.get("business_type", "standard"),
         created_at=updated["created_at"],
         total_income=income[0]["total"] if income else 0.0,
         total_expenses=expenses[0]["total"] if expenses else 0.0,
