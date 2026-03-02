@@ -75,7 +75,7 @@ const BusinessesPage = () => {
       await axios.post(`${API}/businesses`, formData);
       toast.success('Entreprise créée avec succès');
       setDialogOpen(false);
-      setFormData({ name: '', owner_email: '', owner_name: '', owner_password: '' });
+      setFormData({ name: '', owner_email: '', owner_name: '', owner_password: '', business_type: 'standard' });
       fetchBusinesses();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors de la création');
