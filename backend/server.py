@@ -1634,6 +1634,305 @@ async def get_business_stats(business_id: str, user: dict = Depends(get_current_
     }
 
 # =============================================================================
+# VEHICLE CATALOG ROUTES
+# =============================================================================
+
+INITIAL_VEHICLE_CATALOG = [
+    # Commercial
+    {"name": "Aerocab", "category": "Commercial", "price": 150000},
+    {"name": "Airtug", "category": "Commercial", "price": 25000},
+    {"name": "Benson", "category": "Commercial", "price": 85000},
+    {"name": "Caddy", "category": "Commercial", "price": 2500},
+    {"name": "Festi Bus", "category": "Commercial", "price": 950000},
+    {"name": "Glendale Stretch", "category": "Commercial", "price": 75000},
+    {"name": "Hauler", "category": "Commercial", "price": 145000},
+    {"name": "Mule", "category": "Commercial", "price": 70000},
+    {"name": "Patriot Limo", "category": "Commercial", "price": 100000},
+    {"name": "Petite Remorque", "category": "Commercial", "price": 75000},
+    {"name": "Phantom", "category": "Commercial", "price": 140000},
+    {"name": "Phantom Grande Cabine", "category": "Commercial", "price": 175000},
+    {"name": "Plateau", "category": "Commercial", "price": 95000},
+    {"name": "Plateau Militaire", "category": "Commercial", "price": 98000},
+    {"name": "Porte Voiture", "category": "Commercial", "price": 100000},
+    {"name": "Remorque Bateau", "category": "Commercial", "price": 80000},
+    {"name": "Remorque Fourgon", "category": "Commercial", "price": 110000},
+    {"name": "Remorque Frigorifique", "category": "Commercial", "price": 92000},
+    {"name": "Remorque Baggages", "category": "Commercial", "price": 5000},
+    {"name": "Remorque Baggages Ferme", "category": "Commercial", "price": 5000},
+    {"name": "Remorque Cargo", "category": "Commercial", "price": 5000},
+    {"name": "Schafter Limo", "category": "Commercial", "price": 105000},
+    {"name": "Stretch", "category": "Commercial", "price": 85000},
+    # Compacts
+    {"name": "Arias", "category": "Compacts", "price": 7500},
+    {"name": "Asbo", "category": "Compacts", "price": 10000},
+    {"name": "Blista", "category": "Compacts", "price": 12000},
+    {"name": "Blista Compact", "category": "Compacts", "price": 5000},
+    {"name": "Blista Go Go Monkey", "category": "Compacts", "price": 8000},
+    {"name": "Blista Kanjo", "category": "Compacts", "price": 15000},
+    {"name": "Brioso 300", "category": "Compacts", "price": 15000},
+    {"name": "Brioso 300 Widebody", "category": "Compacts", "price": 25000},
+    {"name": "Brioso R/A", "category": "Compacts", "price": 20000},
+    {"name": "Club", "category": "Compacts", "price": 8000},
+    {"name": "Club GTR", "category": "Compacts", "price": 20000},
+    {"name": "Club Leo", "category": "Compacts", "price": 12000},
+    {"name": "Club Widebody", "category": "Compacts", "price": 25000},
+    {"name": "Dilettante", "category": "Compacts", "price": 5000},
+    {"name": "Issi", "category": "Compacts", "price": 16000},
+    {"name": "Issi Classic", "category": "Compacts", "price": 8000},
+    {"name": "Panto", "category": "Compacts", "price": 2500},
+    {"name": "Prairie", "category": "Compacts", "price": 5000},
+    {"name": "Rhapsody", "category": "Compacts", "price": 12000},
+    {"name": "Turtle", "category": "Compacts", "price": 7500},
+    {"name": "Weevil", "category": "Compacts", "price": 10000},
+    # Coupes
+    {"name": "Cognoscenti Cabrio", "category": "Coupes", "price": 95000},
+    {"name": "Euros x32", "category": "Coupes", "price": 45000},
+    {"name": "Exemplar", "category": "Coupes", "price": 85000},
+    {"name": "F620", "category": "Coupes", "price": 52500},
+    {"name": "FR36", "category": "Coupes", "price": 80000},
+    {"name": "Felon", "category": "Coupes", "price": 70000},
+    {"name": "Felon GT", "category": "Coupes", "price": 80000},
+    {"name": "Feltzer", "category": "Coupes", "price": 115000},
+    {"name": "Futo", "category": "Coupes", "price": 17500},
+    {"name": "Jackal", "category": "Coupes", "price": 50000},
+    {"name": "Kanjo SJ", "category": "Coupes", "price": 51000},
+    {"name": "Oracle", "category": "Coupes", "price": 60000},
+    {"name": "Oracle XS", "category": "Coupes", "price": 65000},
+    {"name": "Paragon XR", "category": "Coupes", "price": 130000},
+    {"name": "Postlude", "category": "Coupes", "price": 35000},
+    {"name": "Previon", "category": "Coupes", "price": 70000},
+    {"name": "Sentinel", "category": "Coupes", "price": 50000},
+    {"name": "Sentinel Classic", "category": "Coupes", "price": 85000},
+    {"name": "Sentinel XS", "category": "Coupes", "price": 65000},
+    {"name": "Windsor", "category": "Coupes", "price": 115000},
+    {"name": "Windsor Drop", "category": "Coupes", "price": 150000},
+    {"name": "Zion", "category": "Coupes", "price": 45000},
+    {"name": "Zion Cabrio", "category": "Coupes", "price": 50000},
+    # Drift
+    {"name": "Cypher Drift", "category": "Drift", "price": 105000},
+    {"name": "Euros Drift", "category": "Drift", "price": 125000},
+    {"name": "FR36 Drift", "category": "Drift", "price": 70000},
+    {"name": "Futo Drift", "category": "Drift", "price": 50000},
+    {"name": "Jester Drift", "category": "Drift", "price": 150000},
+    {"name": "Nebula Drift", "category": "Drift", "price": 55000},
+    {"name": "Remus Drift", "category": "Drift", "price": 80000},
+    {"name": "Sentinel Drift", "category": "Drift", "price": 85000},
+    {"name": "Tampa Drift", "category": "Drift", "price": 60000},
+    {"name": "Vorschlagen Drift", "category": "Drift", "price": 80000},
+    {"name": "Yosemite Drift", "category": "Drift", "price": 50000},
+    {"name": "Zr350 Drift", "category": "Drift", "price": 75000},
+]
+
+@api_router.post("/vehicles/seed")
+async def seed_vehicle_catalog(admin: dict = Depends(require_admin)):
+    """Seed the vehicle catalog with initial data"""
+    existing = await db.vehicle_catalog.count_documents({})
+    if existing > 0:
+        return {"message": f"Catalogue déjà rempli ({existing} véhicules)"}
+    
+    docs = [{"id": str(uuid.uuid4()), **v, "created_at": datetime.now(timezone.utc).isoformat()} for v in INITIAL_VEHICLE_CATALOG]
+    await db.vehicle_catalog.insert_many(docs)
+    return {"message": f"{len(docs)} véhicules ajoutés au catalogue"}
+
+@api_router.get("/vehicles")
+async def get_vehicles(category: Optional[str] = None):
+    """Get all vehicles from the catalog"""
+    query = {}
+    if category:
+        query["category"] = category
+    vehicles = await db.vehicle_catalog.find(query, {"_id": 0}).sort("category", 1).to_list(5000)
+    return vehicles
+
+@api_router.get("/vehicles/categories")
+async def get_vehicle_categories():
+    """Get all unique vehicle categories"""
+    categories = await db.vehicle_catalog.distinct("category")
+    return sorted(categories)
+
+@api_router.post("/vehicles")
+async def create_vehicle(data: VehicleCreate, user: dict = Depends(require_patron_or_admin)):
+    """Add a vehicle to the catalog"""
+    vehicle_doc = {
+        "id": str(uuid.uuid4()),
+        "name": data.name,
+        "category": data.category,
+        "price": data.price,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.vehicle_catalog.insert_one(vehicle_doc)
+    vehicle_doc.pop("_id", None)
+    return vehicle_doc
+
+@api_router.put("/vehicles/{vehicle_id}")
+async def update_vehicle(vehicle_id: str, data: VehicleUpdate, user: dict = Depends(require_patron_or_admin)):
+    """Update a vehicle in the catalog"""
+    vehicle = await db.vehicle_catalog.find_one({"id": vehicle_id}, {"_id": 0})
+    if not vehicle:
+        raise HTTPException(status_code=404, detail="Véhicule non trouvé")
+    update = {k: v for k, v in data.model_dump().items() if v is not None}
+    if update:
+        await db.vehicle_catalog.update_one({"id": vehicle_id}, {"$set": update})
+    updated = await db.vehicle_catalog.find_one({"id": vehicle_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/vehicles/{vehicle_id}")
+async def delete_vehicle(vehicle_id: str, user: dict = Depends(require_patron_or_admin)):
+    """Delete a vehicle from the catalog"""
+    result = await db.vehicle_catalog.delete_one({"id": vehicle_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Véhicule non trouvé")
+    return {"message": "Véhicule supprimé"}
+
+# =============================================================================
+# VEHICLE ORDERS ROUTES
+# =============================================================================
+
+ORDER_STATUSES = ["en_attente", "fabrication", "receptionne", "livre"]
+
+@api_router.post("/vehicle-orders")
+async def create_vehicle_order(data: VehicleOrderCreate, user: dict = Depends(get_current_user)):
+    """Create a new vehicle order (dealership employee/patron)"""
+    if user["role"] == UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Les commandes sont créées par les concessionnaires")
+    
+    # Get vehicle info
+    vehicle = await db.vehicle_catalog.find_one({"id": data.vehicle_id}, {"_id": 0})
+    if not vehicle:
+        raise HTTPException(status_code=404, detail="Véhicule non trouvé dans le catalogue")
+    
+    # Validate reduction
+    if data.reduction_percent > 30:
+        raise HTTPException(status_code=400, detail="La réduction ne peut pas dépasser 30%")
+    if data.reduction_percent < 0:
+        raise HTTPException(status_code=400, detail="La réduction ne peut pas être négative")
+    
+    # Calculate final price
+    base_price = vehicle["price"]
+    reduction_amount = base_price * (data.reduction_percent / 100)
+    final_price = base_price - reduction_amount - data.reduction_exceptional
+    if final_price < 0:
+        final_price = 0
+    
+    business = await db.businesses.find_one({"id": user["business_id"]}, {"_id": 0, "name": 1})
+    
+    order_doc = {
+        "id": str(uuid.uuid4()),
+        "business_id": user["business_id"],
+        "business_name": business["name"] if business else "Inconnu",
+        "personnel_id": user["id"],
+        "personnel_name": user["name"],
+        "client_name": data.client_name,
+        "client_phone": data.client_phone,
+        "client_enterprise": data.client_enterprise,
+        "vehicle_id": vehicle["id"],
+        "vehicle_name": vehicle["name"],
+        "vehicle_category": vehicle["category"],
+        "vehicle_base_price": base_price,
+        "reduction_percent": data.reduction_percent,
+        "reduction_exceptional": data.reduction_exceptional,
+        "final_price": final_price,
+        "client_called": False,
+        "plate_number": "",
+        "advancement": "en_attente",
+        "dna_comment": "",
+        "commentary": data.commentary,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.vehicle_orders.insert_one(order_doc)
+    order_doc.pop("_id", None)
+    return order_doc
+
+@api_router.get("/vehicle-orders")
+async def get_vehicle_orders(user: dict = Depends(get_current_user)):
+    """Get vehicle orders for user's business or all for admin"""
+    if user["role"] == UserRole.ADMIN:
+        orders = await db.vehicle_orders.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    else:
+        orders = await db.vehicle_orders.find({"business_id": user["business_id"]}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    return orders
+
+@api_router.put("/vehicle-orders/{order_id}")
+async def update_vehicle_order(order_id: str, data: VehicleOrderUpdate, user: dict = Depends(get_current_user)):
+    """Update a vehicle order"""
+    order = await db.vehicle_orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    if user["role"] != UserRole.ADMIN and order["business_id"] != user["business_id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    update = {k: v for k, v in data.model_dump().items() if v is not None}
+    
+    # Recalculate price if reduction changed
+    if "reduction_percent" in update:
+        if update["reduction_percent"] > 30:
+            raise HTTPException(status_code=400, detail="La réduction ne peut pas dépasser 30%")
+        base = order["vehicle_base_price"]
+        red_pct = update.get("reduction_percent", order["reduction_percent"])
+        red_exc = update.get("reduction_exceptional", order["reduction_exceptional"])
+        update["final_price"] = max(0, base - base * (red_pct / 100) - red_exc)
+    
+    if "reduction_exceptional" in update and "reduction_percent" not in update:
+        base = order["vehicle_base_price"]
+        red_pct = order["reduction_percent"]
+        red_exc = update["reduction_exceptional"]
+        update["final_price"] = max(0, base - base * (red_pct / 100) - red_exc)
+    
+    update["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.vehicle_orders.update_one({"id": order_id}, {"$set": update})
+    updated = await db.vehicle_orders.find_one({"id": order_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/vehicle-orders/{order_id}")
+async def delete_vehicle_order(order_id: str, user: dict = Depends(get_current_user)):
+    """Delete a vehicle order"""
+    order = await db.vehicle_orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    if user["role"] != UserRole.ADMIN and order["business_id"] != user["business_id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    await db.vehicle_orders.delete_one({"id": order_id})
+    return {"message": "Commande supprimée"}
+
+@api_router.put("/vehicle-orders/{order_id}/advancement")
+async def update_order_advancement(order_id: str, advancement: str, dna_comment: str = "", user: dict = Depends(get_current_user)):
+    """Update order advancement status (DNA business or admin)"""
+    if advancement not in ORDER_STATUSES:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs: {ORDER_STATUSES}")
+    
+    order = await db.vehicle_orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    update = {"advancement": advancement, "updated_at": datetime.now(timezone.utc).isoformat()}
+    if dna_comment:
+        update["dna_comment"] = dna_comment
+    
+    await db.vehicle_orders.update_one({"id": order_id}, {"$set": update})
+    updated = await db.vehicle_orders.find_one({"id": order_id}, {"_id": 0})
+    return updated
+
+@api_router.put("/vehicle-orders/{order_id}/call")
+async def toggle_client_call(order_id: str, user: dict = Depends(get_current_user)):
+    """Toggle the client called status"""
+    order = await db.vehicle_orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    if user["role"] != UserRole.ADMIN and order["business_id"] != user["business_id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    new_val = not order.get("client_called", False)
+    await db.vehicle_orders.update_one({"id": order_id}, {"$set": {"client_called": new_val, "updated_at": datetime.now(timezone.utc).isoformat()}})
+    return {"client_called": new_val}
+
+@api_router.get("/vehicle-orders/all")
+async def get_all_vehicle_orders(admin: dict = Depends(require_admin)):
+    """Get ALL vehicle orders across all businesses (admin/government)"""
+    orders = await db.vehicle_orders.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
+    return orders
+
+# =============================================================================
 # APP CONFIG
 # =============================================================================
 
