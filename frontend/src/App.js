@@ -22,6 +22,7 @@ import TaxBracketsPage from "./pages/admin/TaxBracketsPage";
 import GlobalAccountingPage from "./pages/admin/GlobalAccountingPage";
 import ExpensesReviewPage from "./pages/admin/ExpensesReviewPage";
 import UsersManagementPage from "./pages/admin/UsersManagementPage";
+import AccountingHistoryPage from "./pages/admin/AccountingHistoryPage";
 import BusinessDashboard from "./pages/business/BusinessDashboard";
 import EmployeesPage from "./pages/business/EmployeesPage";
 import TransactionsPage from "./pages/business/TransactionsPage";
@@ -160,6 +161,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <ExpensesReviewPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/accounting-history"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AccountingHistoryPage />
           </ProtectedRoute>
         }
       />
