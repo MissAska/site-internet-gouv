@@ -264,6 +264,21 @@ const TaxNoticesPage = () => {
                     <span className="px-3 py-1 bg-amber-500/20 text-amber-500 text-xs uppercase tracking-wider border border-amber-500/30">
                       {(notice.tax_rate * 100).toFixed(0)}% Taux
                     </span>
+                    <span
+                      className={`px-3 py-1 text-xs uppercase tracking-wider border cursor-pointer transition-all ${
+                        notice.status === 'paid'
+                          ? 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30'
+                          : 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30'
+                      }`}
+                      onClick={() => handleToggleStatus(notice.id)}
+                      data-testid={`toggle-status-${notice.id}`}
+                    >
+                      {notice.status === 'paid' ? (
+                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Payé</span>
+                      ) : (
+                        <span className="flex items-center gap-1"><XCircle className="w-3 h-3" /> Non payé</span>
+                      )}
+                    </span>
                   </div>
                 </div>
 
