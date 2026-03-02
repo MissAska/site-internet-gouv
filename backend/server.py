@@ -672,10 +672,16 @@ async def get_businesses(user: dict = Depends(get_current_user)):
     if not businesses:
         return []
     
-    # Batch: single aggregation for all transaction totals
+    # Batch: single aggregation for transaction totals
     biz_ids = [b["id"] for b in businesses]
+    match_filter = {"business_id": {"$in": biz_ids}}
+    
+    # Non-admin: only current week totals
+    if user["role"] != UserRole.ADMIN:
+        match_filter["created_at"] = {"$gte": get_current_week_start().isoformat()}
+    
     totals_agg = await db.transactions.aggregate([
-        {"$match": {"business_id": {"$in": biz_ids}}},
+        {"$match": match_filter},
         {"$group": {"_id": {"business_id": "$business_id", "type": "$type"}, "total": {"$sum": "$amount"}}}
     ]).to_list(10000)
     
