@@ -11,7 +11,10 @@ import {
   DollarSign,
   LayoutDashboard,
   Calculator,
-  History
+  History,
+  Car,
+  ClipboardList,
+  Wrench
 } from 'lucide-react';
 import { Button } from './ui/button';
 
