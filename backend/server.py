@@ -1207,6 +1207,42 @@ async def create_manual_snapshot(admin: dict = Depends(require_admin)):
     snapshots = await create_weekly_snapshots()
     return {"message": f"{len(snapshots)} snapshots créés", "snapshots": snapshots}
 
+@api_router.get("/admin/accounting-history/{snapshot_id}/details")
+async def get_snapshot_details(snapshot_id: str, admin: dict = Depends(require_admin)):
+    """Get full details for a specific accounting snapshot including all transactions"""
+    snapshot = await db.accounting_snapshots.find_one({"id": snapshot_id}, {"_id": 0})
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot non trouvé")
+    
+    # Get all transactions for this business during the snapshot period
+    transactions = await db.transactions.find(
+        {
+            "business_id": snapshot["business_id"],
+            "created_at": {"$gte": snapshot["period_start"], "$lte": snapshot["period_end"]}
+        },
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(5000)
+    
+    # Get employees involved (for salary names)
+    employee_ids = list(set(t.get("employee_id") for t in transactions if t.get("employee_id")))
+    employees = await db.users.find({"id": {"$in": employee_ids}}, {"_id": 0, "id": 1, "name": 1}).to_list(1000) if employee_ids else []
+    emp_map = {e["id"]: e["name"] for e in employees}
+    
+    # Enrich transactions with employee names
+    for t in transactions:
+        if t.get("employee_id"):
+            t["employee_name"] = emp_map.get(t["employee_id"], "Inconnu")
+    
+    return {
+        "snapshot": snapshot,
+        "transactions": transactions,
+        "summary": {
+            "income_count": sum(1 for t in transactions if t["type"] == TransactionType.INCOME),
+            "expense_count": sum(1 for t in transactions if t["type"] == TransactionType.EXPENSE),
+            "salary_count": sum(1 for t in transactions if t["type"] == TransactionType.SALARY),
+        }
+    }
+
 @api_router.get("/tax-notices/{notice_id}/pdf")
 async def export_tax_notice_pdf(notice_id: str, user: dict = Depends(get_current_user)):
     """Export a tax notice as PDF"""
