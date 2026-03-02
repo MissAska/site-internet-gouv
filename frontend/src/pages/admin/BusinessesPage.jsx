@@ -110,7 +110,8 @@ const BusinessesPage = () => {
     try {
       await axios.put(`${API}/businesses/${editData.id}`, {
         name: editData.name,
-        owner_name: editData.owner_name
+        owner_name: editData.owner_name,
+        business_type: editData.business_type
       });
       toast.success('Entreprise modifiée avec succès');
       setEditDialogOpen(false);
