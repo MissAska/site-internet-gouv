@@ -258,6 +258,13 @@ const BusinessesPage = () => {
                         <div>
                           <CardTitle className="text-lg">{business.name}</CardTitle>
                           <p className="text-sm text-muted-foreground">{business.owner_name}</p>
+                          {business.business_type && business.business_type !== 'standard' && (
+                            <span className={`inline-block mt-1 px-2 py-0.5 text-xs uppercase tracking-wider border ${
+                              business.business_type === 'concessionnaire' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                              business.business_type === 'dna' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30' :
+                              'bg-secondary text-muted-foreground border-border'
+                            }`}>{business.business_type === 'dna' ? 'DN Automotive' : business.business_type}</span>
+                          )}
                         </div>
                       </div>
                       <div className="flex gap-1">
