@@ -232,6 +232,125 @@ async def require_admin(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
     return user
 
+def get_current_week_start():
+    """Returns the most recent Sunday at 00:00 UTC"""
+    now = datetime.now(timezone.utc)
+    days_since_sunday = (now.weekday() + 1) % 7
+    week_start = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days_since_sunday)
+    return week_start
+
+async def create_weekly_snapshots():
+    """Create accounting snapshots for all businesses"""
+    now = datetime.now(timezone.utc)
+    week_start = get_current_week_start()
+    
+    businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
+    if not businesses:
+        return []
+    
+    biz_ids = [b["id"] for b in businesses]
+    
+    # Batch aggregation for weekly totals
+    tx_totals = await db.transactions.aggregate([
+        {"$match": {"business_id": {"$in": biz_ids}, "created_at": {"$gte": week_start.isoformat()}}},
+        {"$group": {"_id": {"business_id": "$business_id", "type": "$type"}, "total": {"$sum": "$amount"}}}
+    ]).to_list(10000)
+    
+    tx_map = {}
+    for t in tx_totals:
+        biz_id = t["_id"]["business_id"]
+        tx_type = t["_id"]["type"]
+        if biz_id not in tx_map:
+            tx_map[biz_id] = {}
+        tx_map[biz_id][tx_type] = t["total"]
+    
+    snapshots = []
+    for b in businesses:
+        totals = tx_map.get(b["id"], {})
+        income = totals.get(TransactionType.INCOME, 0.0)
+        expenses = totals.get(TransactionType.EXPENSE, 0.0)
+        salaries = totals.get(TransactionType.SALARY, 0.0)
+        
+        snapshot_doc = {
+            "id": str(uuid.uuid4()),
+            "business_id": b["id"],
+            "business_name": b["name"],
+            "period_start": week_start.isoformat(),
+            "period_end": now.isoformat(),
+            "total_income": income,
+            "total_expenses": expenses,
+            "total_salaries": salaries,
+            "gross_profit": income - expenses - salaries,
+            "created_at": now.isoformat()
+        }
+        await db.accounting_snapshots.insert_one(snapshot_doc)
+        snapshot_doc.pop("_id", None)
+        snapshots.append(snapshot_doc)
+    
+    logger.info(f"Created {len(snapshots)} accounting snapshots")
+    return snapshots
+
+async def weekly_scheduler_task():
+    """Background task that runs every Sunday at 23:59 UTC"""
+    while True:
+        try:
+            now = datetime.now(timezone.utc)
+            days_until_sunday = (6 - now.weekday()) % 7
+            if days_until_sunday == 0 and (now.hour > 23 or (now.hour == 23 and now.minute >= 59)):
+                days_until_sunday = 7
+            next_sunday = (now + timedelta(days=days_until_sunday)).replace(hour=23, minute=59, second=0, microsecond=0)
+            wait_seconds = (next_sunday - now).total_seconds()
+            logger.info(f"Next auto snapshot: {next_sunday.isoformat()} (in {wait_seconds/3600:.1f}h)")
+            await asyncio.sleep(wait_seconds)
+            
+            logger.info("Running automatic weekly snapshots and tax notices...")
+            await create_weekly_snapshots()
+            
+            # Auto-generate tax notices
+            businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
+            brackets = await db.tax_brackets.find({}, {"_id": 0}).to_list(100)
+            if not brackets:
+                brackets = DEFAULT_TAX_BRACKETS
+            
+            period_end = datetime.now(timezone.utc)
+            period_start = get_current_week_start()
+            
+            for business in businesses:
+                biz_id = business["id"]
+                income_agg = await db.transactions.aggregate([
+                    {"$match": {"business_id": biz_id, "type": TransactionType.INCOME, "created_at": {"$gte": period_start.isoformat(), "$lte": period_end.isoformat()}}},
+                    {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+                ]).to_list(1)
+                expenses_agg = await db.transactions.aggregate([
+                    {"$match": {"business_id": biz_id, "type": TransactionType.EXPENSE, "created_at": {"$gte": period_start.isoformat(), "$lte": period_end.isoformat()}}},
+                    {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+                ]).to_list(1)
+                salaries_agg = await db.transactions.aggregate([
+                    {"$match": {"business_id": biz_id, "type": TransactionType.SALARY, "created_at": {"$gte": period_start.isoformat(), "$lte": period_end.isoformat()}}},
+                    {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+                ]).to_list(1)
+                
+                gross_revenue = income_agg[0]["total"] if income_agg else 0.0
+                total_expenses = expenses_agg[0]["total"] if expenses_agg else 0.0
+                total_salaries = salaries_agg[0]["total"] if salaries_agg else 0.0
+                taxable_income = max(0, gross_revenue - total_expenses - total_salaries)
+                tax_rate, tax_amount = calculate_tax(taxable_income, brackets)
+                
+                notice_doc = {
+                    "id": str(uuid.uuid4()), "business_id": biz_id, "business_name": business["name"],
+                    "period_start": period_start.isoformat(), "period_end": period_end.isoformat(),
+                    "gross_revenue": gross_revenue, "total_expenses": total_expenses, "total_salaries": total_salaries,
+                    "taxable_income": taxable_income, "tax_rate": tax_rate, "tax_amount": tax_amount,
+                    "status": "unpaid", "created_at": period_end.isoformat()
+                }
+                await db.tax_notices.insert_one(notice_doc)
+            
+            logger.info("Auto weekly snapshots and tax notices completed")
+            await asyncio.sleep(120)
+        except Exception as e:
+            logger.error(f"Weekly scheduler error: {e}")
+            await asyncio.sleep(3600)
+
 async def require_patron_or_admin(user: dict = Depends(get_current_user)):
     if user["role"] not in [UserRole.ADMIN, UserRole.PATRON]:
         raise HTTPException(status_code=403, detail="Accès réservé aux patrons et administrateurs")
