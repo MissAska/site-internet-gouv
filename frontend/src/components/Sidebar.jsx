@@ -38,27 +38,44 @@ const Sidebar = () => {
     { to: '/admin/tax-brackets', icon: Settings, label: 'Tranches fiscales' },
   ];
 
-  const patronLinks = [
-    { to: '/business', icon: LayoutDashboard, label: 'Tableau de bord' },
-    { to: '/cash-register', icon: DollarSign, label: 'Caisse' },
-    { to: '/business/vehicle-orders', icon: ClipboardList, label: 'Commandes véhicules' },
-    { to: '/business/dna-orders', icon: Wrench, label: 'Suivi DNA' },
-    { to: '/business/vehicle-catalog', icon: Car, label: 'Catalogue véhicules' },
-    { to: '/business/employees', icon: Users, label: 'Employés' },
-    { to: '/business/transactions', icon: Activity, label: 'Transactions' },
-    { to: '/business/accounting', icon: Calculator, label: 'Comptabilité' },
-    { to: '/business/tax-notices', icon: FileText, label: 'Avis d\'impôts' },
-  ];
+  const businessType = user?.business_type;
 
-  // Dynamic employee links based on permissions
+  const patronLinks = useMemo(() => {
+    const links = [
+      { to: '/business', icon: LayoutDashboard, label: 'Tableau de bord' },
+      { to: '/cash-register', icon: DollarSign, label: 'Caisse' },
+    ];
+    if (businessType === 'concessionnaire') {
+      links.push({ to: '/business/vehicle-orders', icon: ClipboardList, label: 'Commandes véhicules' });
+      links.push({ to: '/business/dna-orders', icon: Wrench, label: 'Suivi DNA' });
+      links.push({ to: '/business/vehicle-catalog', icon: Car, label: 'Catalogue véhicules' });
+    }
+    if (businessType === 'dna') {
+      links.push({ to: '/business/dna-orders', icon: Wrench, label: 'Suivi fabrication' });
+    }
+    links.push(
+      { to: '/business/employees', icon: Users, label: 'Employés' },
+      { to: '/business/transactions', icon: Activity, label: 'Transactions' },
+      { to: '/business/accounting', icon: Calculator, label: 'Comptabilité' },
+      { to: '/business/tax-notices', icon: FileText, label: 'Avis d\'impôts' },
+    );
+    return links;
+  }, [businessType]);
+
+  // Dynamic employee links based on permissions and business type
   const getEmployeeLinks = () => {
     const permissions = user?.permissions || {};
     const links = [];
     
     if (permissions.cash_register !== false) {
       links.push({ to: '/cash-register', icon: DollarSign, label: 'Caisse enregistreuse' });
-      links.push({ to: '/employee/vehicle-orders', icon: ClipboardList, label: 'Commandes véhicules' });
-      links.push({ to: '/employee/dna-orders', icon: Wrench, label: 'Suivi DNA' });
+      if (businessType === 'concessionnaire') {
+        links.push({ to: '/employee/vehicle-orders', icon: ClipboardList, label: 'Commandes véhicules' });
+        links.push({ to: '/employee/dna-orders', icon: Wrench, label: 'Suivi DNA' });
+      }
+      if (businessType === 'dna') {
+        links.push({ to: '/employee/dna-orders', icon: Wrench, label: 'Suivi fabrication' });
+      }
     }
     if (permissions.view_transactions) {
       links.push({ to: '/employee/transactions', icon: Activity, label: 'Transactions' });
