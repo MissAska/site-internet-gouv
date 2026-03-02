@@ -1501,33 +1501,41 @@ async def get_business_stats(business_id: str, user: dict = Depends(get_current_
         raise HTTPException(status_code=403, detail="Accès non autorisé")
     
     employees_count = await db.users.count_documents({"business_id": business_id, "role": UserRole.EMPLOYEE})
-    transactions_count = await db.transactions.count_documents({"business_id": business_id})
     
-    # Last 30 days stats
-    thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    # Non-admin: current week only. Admin: all time
+    if user["role"] != UserRole.ADMIN:
+        date_filter = get_current_week_start().isoformat()
+        transactions_count = await db.transactions.count_documents({"business_id": business_id, "created_at": {"$gte": date_filter}})
+    else:
+        date_filter = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        transactions_count = await db.transactions.count_documents({"business_id": business_id})
     
     income_agg = await db.transactions.aggregate([
-        {"$match": {"business_id": business_id, "type": TransactionType.INCOME, "created_at": {"$gte": thirty_days_ago}}},
+        {"$match": {"business_id": business_id, "type": TransactionType.INCOME, "created_at": {"$gte": date_filter}}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]).to_list(1)
     
     expenses_agg = await db.transactions.aggregate([
-        {"$match": {"business_id": business_id, "type": TransactionType.EXPENSE, "created_at": {"$gte": thirty_days_ago}}},
+        {"$match": {"business_id": business_id, "type": TransactionType.EXPENSE, "created_at": {"$gte": date_filter}}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]).to_list(1)
     
     salaries_agg = await db.transactions.aggregate([
-        {"$match": {"business_id": business_id, "type": TransactionType.SALARY, "created_at": {"$gte": thirty_days_ago}}},
+        {"$match": {"business_id": business_id, "type": TransactionType.SALARY, "created_at": {"$gte": date_filter}}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]).to_list(1)
+    
+    income = income_agg[0]["total"] if income_agg else 0
+    expenses = expenses_agg[0]["total"] if expenses_agg else 0
+    salaries = salaries_agg[0]["total"] if salaries_agg else 0
     
     return {
         "employees_count": employees_count,
         "transactions_count": transactions_count,
-        "monthly_income": income_agg[0]["total"] if income_agg else 0,
-        "monthly_expenses": expenses_agg[0]["total"] if expenses_agg else 0,
-        "monthly_salaries": salaries_agg[0]["total"] if salaries_agg else 0,
-        "monthly_profit": (income_agg[0]["total"] if income_agg else 0) - (expenses_agg[0]["total"] if expenses_agg else 0) - (salaries_agg[0]["total"] if salaries_agg else 0)
+        "monthly_income": income,
+        "monthly_expenses": expenses,
+        "monthly_salaries": salaries,
+        "monthly_profit": income - expenses - salaries
     }
 
 # =============================================================================
