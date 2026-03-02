@@ -207,6 +207,19 @@ const BusinessesPage = () => {
                     </button>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label className="uppercase tracking-wider text-xs">Type d'entreprise</Label>
+                  <Select value={formData.business_type} onValueChange={v => setFormData({...formData, business_type: v})}>
+                    <SelectTrigger className="bg-input border-border" data-testid="business-type-select">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="concessionnaire">Concessionnaire</SelectItem>
+                      <SelectItem value="dna">DN Automotive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button type="submit" className="w-full uppercase tracking-wider" data-testid="submit-business-btn">
                   Créer l'entreprise
                 </Button>
