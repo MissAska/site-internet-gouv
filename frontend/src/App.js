@@ -285,6 +285,22 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/employee/vehicle-orders"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <VehicleOrdersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employee/dna-orders"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <DnaOrdersPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default Redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
