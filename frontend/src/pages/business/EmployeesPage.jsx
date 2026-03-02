@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Checkbox } from '../../components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../../components/ui/dialog';
-import { Users, Plus, Trash2, Eye, EyeOff, DollarSign, Pencil, Shield, ShieldCheck, ShieldX } from 'lucide-react';
+import { Users, Plus, Trash2, Eye, EyeOff, DollarSign, Pencil, Shield, ShieldCheck, ShieldX, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
