@@ -260,9 +260,9 @@ async def set_accounting_reset():
     )
 
 async def create_weekly_snapshots():
-    """Create accounting snapshots for all businesses"""
+    """Create accounting snapshots for all businesses and reset the accounting period"""
     now = datetime.now(timezone.utc)
-    week_start = get_current_week_start()
+    week_start = await get_accounting_period_start()
     
     businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
     if not businesses:
@@ -270,7 +270,7 @@ async def create_weekly_snapshots():
     
     biz_ids = [b["id"] for b in businesses]
     
-    # Batch aggregation for weekly totals
+    # Batch aggregation for period totals
     tx_totals = await db.transactions.aggregate([
         {"$match": {"business_id": {"$in": biz_ids}, "created_at": {"$gte": week_start.isoformat()}}},
         {"$group": {"_id": {"business_id": "$business_id", "type": "$type"}, "total": {"$sum": "$amount"}}}
@@ -307,7 +307,10 @@ async def create_weekly_snapshots():
         snapshot_doc.pop("_id", None)
         snapshots.append(snapshot_doc)
     
-    logger.info(f"Created {len(snapshots)} accounting snapshots")
+    # Reset the accounting period
+    await set_accounting_reset()
+    
+    logger.info(f"Created {len(snapshots)} accounting snapshots and reset accounting period")
     return snapshots
 
 async def weekly_scheduler_task():
