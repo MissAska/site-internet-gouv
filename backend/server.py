@@ -469,12 +469,18 @@ async def login(data: UserLogin):
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(user: dict = Depends(get_current_user)):
+    business_type = None
+    if user.get("business_id"):
+        biz = await db.businesses.find_one({"id": user["business_id"]}, {"_id": 0, "business_type": 1})
+        if biz:
+            business_type = biz.get("business_type", "standard")
     return UserResponse(
         id=user["id"],
         email=user["email"],
         name=user["name"],
         role=user["role"],
         business_id=user.get("business_id"),
+        business_type=business_type,
         permissions=user.get("permissions"),
         created_at=user["created_at"]
     )
