@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
-import { FileText, RefreshCw, Building2, Calendar, DollarSign, Trash2, FileDown, ArrowUpDown } from 'lucide-react';
+import { FileText, RefreshCw, Building2, Calendar, DollarSign, Trash2, FileDown, ArrowUpDown, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -133,6 +133,17 @@ const TaxNoticesPage = () => {
       fetchNotices();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleToggleStatus = async (noticeId) => {
+    try {
+      const response = await axios.put(`${API}/tax-notices/${noticeId}/status`);
+      const newStatus = response.data.status;
+      toast.success(newStatus === 'paid' ? 'Marqué comme payé' : 'Marqué comme non payé');
+      setNotices(prev => prev.map(n => n.id === noticeId ? { ...n, status: newStatus } : n));
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
     }
   };
 
