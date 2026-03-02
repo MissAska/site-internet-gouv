@@ -217,6 +217,30 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/business/vehicle-catalog"
+        element={
+          <ProtectedRoute allowedRoles={['patron']}>
+            <VehicleCatalogPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/vehicle-orders"
+        element={
+          <ProtectedRoute allowedRoles={['patron', 'employee']}>
+            <VehicleOrdersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/dna-orders"
+        element={
+          <ProtectedRoute allowedRoles={['patron', 'employee']}>
+            <DnaOrdersPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Cash Register (Patron & Employee) */}
       <Route
