@@ -1168,6 +1168,33 @@ async def delete_tax_notice(notice_id: str, admin: dict = Depends(require_admin)
     await db.tax_notices.delete_one({"id": notice_id})
     return {"message": "Avis d'impôt supprimé"}
 
+@api_router.put("/tax-notices/{notice_id}/status")
+async def update_tax_notice_status(notice_id: str, admin: dict = Depends(require_admin)):
+    """Toggle tax notice paid/unpaid status (admin only)"""
+    notice = await db.tax_notices.find_one({"id": notice_id}, {"_id": 0})
+    if not notice:
+        raise HTTPException(status_code=404, detail="Avis d'impôt non trouvé")
+    
+    new_status = "paid" if notice.get("status", "unpaid") == "unpaid" else "unpaid"
+    await db.tax_notices.update_one({"id": notice_id}, {"$set": {"status": new_status}})
+    return {"message": f"Statut mis à jour: {new_status}", "status": new_status}
+
+# =============================================================================
+# ACCOUNTING HISTORY ROUTES (Admin only)
+# =============================================================================
+
+@api_router.get("/admin/accounting-history")
+async def get_accounting_history(admin: dict = Depends(require_admin)):
+    """Get all accounting snapshots (admin only)"""
+    snapshots = await db.accounting_snapshots.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    return snapshots
+
+@api_router.post("/admin/accounting-snapshot")
+async def create_manual_snapshot(admin: dict = Depends(require_admin)):
+    """Manually create an accounting snapshot (admin only)"""
+    snapshots = await create_weekly_snapshots()
+    return {"message": f"{len(snapshots)} snapshots créés", "snapshots": snapshots}
+
 @api_router.get("/tax-notices/{notice_id}/pdf")
 async def export_tax_notice_pdf(notice_id: str, user: dict = Depends(get_current_user)):
     """Export a tax notice as PDF"""
