@@ -57,6 +57,8 @@ const Sidebar = () => {
     
     if (permissions.cash_register !== false) {
       links.push({ to: '/cash-register', icon: DollarSign, label: 'Caisse enregistreuse' });
+      links.push({ to: '/employee/vehicle-orders', icon: ClipboardList, label: 'Commandes véhicules' });
+      links.push({ to: '/employee/dna-orders', icon: Wrench, label: 'Suivi DNA' });
     }
     if (permissions.view_transactions) {
       links.push({ to: '/employee/transactions', icon: Activity, label: 'Transactions' });
