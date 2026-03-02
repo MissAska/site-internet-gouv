@@ -173,6 +173,19 @@ class TaxNoticeResponse(BaseModel):
     taxable_income: float
     tax_rate: float
     tax_amount: float
+    status: str = "unpaid"
+    created_at: str
+
+class AccountingSnapshotResponse(BaseModel):
+    id: str
+    business_id: str
+    business_name: str
+    period_start: str
+    period_end: str
+    total_income: float
+    total_expenses: float
+    total_salaries: float
+    gross_profit: float
     created_at: str
 
 # Default Tax Brackets (can be modified by admin)
