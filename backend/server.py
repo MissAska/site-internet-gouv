@@ -759,6 +759,7 @@ async def get_businesses(user: dict = Depends(get_current_user)):
             name=b["name"],
             owner_id=b["owner_id"],
             owner_name=b["owner_name"],
+            business_type=b.get("business_type", "standard"),
             created_at=b["created_at"],
             total_income=totals_map.get(b["id"], {}).get(TransactionType.INCOME, 0.0),
             total_expenses=totals_map.get(b["id"], {}).get(TransactionType.EXPENSE, 0.0),
