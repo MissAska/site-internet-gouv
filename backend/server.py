@@ -188,6 +188,36 @@ class AccountingSnapshotResponse(BaseModel):
     gross_profit: float
     created_at: str
 
+# Vehicle Models
+class VehicleCreate(BaseModel):
+    name: str
+    category: str
+    price: float
+
+class VehicleUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    price: Optional[float] = None
+
+class VehicleOrderCreate(BaseModel):
+    client_name: str
+    client_phone: str = ""
+    client_enterprise: str = ""
+    vehicle_id: str
+    reduction_percent: float = 0.0
+    reduction_exceptional: float = 0.0
+    commentary: str = ""
+
+class VehicleOrderUpdate(BaseModel):
+    client_name: Optional[str] = None
+    client_phone: Optional[str] = None
+    client_enterprise: Optional[str] = None
+    reduction_percent: Optional[float] = None
+    reduction_exceptional: Optional[float] = None
+    plate_number: Optional[str] = None
+    client_called: Optional[bool] = None
+    commentary: Optional[str] = None
+
 # Default Tax Brackets (can be modified by admin)
 DEFAULT_TAX_BRACKETS = [
     {"min_amount": 0, "max_amount": 50000, "rate": 0.10},
