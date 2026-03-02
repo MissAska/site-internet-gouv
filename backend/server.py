@@ -1069,10 +1069,13 @@ def calculate_tax(taxable_income: float, brackets: List[dict]) -> tuple:
 
 @api_router.post("/tax-notices/generate", response_model=List[TaxNoticeResponse])
 async def generate_tax_notices(admin: dict = Depends(require_admin)):
-    """Generate tax notices for all businesses"""
+    """Generate tax notices for all businesses and create accounting snapshots"""
     now = datetime.now(timezone.utc)
     period_end = now
-    period_start = now - timedelta(days=7)
+    period_start = get_current_week_start()
+    
+    # Create accounting snapshots first
+    await create_weekly_snapshots()
     
     businesses = await db.businesses.find({}, {"_id": 0}).to_list(1000)
     brackets = await db.tax_brackets.find({}, {"_id": 0}).to_list(100)
@@ -1129,6 +1132,7 @@ async def generate_tax_notices(admin: dict = Depends(require_admin)):
             "taxable_income": taxable_income,
             "tax_rate": tax_rate,
             "tax_amount": tax_amount,
+            "status": "unpaid",
             "created_at": now.isoformat()
         }
         await db.tax_notices.insert_one(notice_doc)
