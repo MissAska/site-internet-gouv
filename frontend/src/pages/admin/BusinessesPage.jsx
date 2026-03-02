@@ -13,6 +13,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../../components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
 import { Building2, Plus, Trash2, Eye, EyeOff, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -36,12 +43,14 @@ const BusinessesPage = () => {
     name: '',
     owner_email: '',
     owner_name: '',
-    owner_password: ''
+    owner_password: '',
+    business_type: 'standard'
   });
   const [editData, setEditData] = useState({
     id: '',
     name: '',
-    owner_name: ''
+    owner_name: '',
+    business_type: 'standard'
   });
 
   useEffect(() => {
