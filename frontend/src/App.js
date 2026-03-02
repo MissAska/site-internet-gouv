@@ -234,6 +234,30 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/employee/accounting"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <AccountingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employee/tax-notices"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <BusinessTaxNoticesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employee/manage"
+        element={
+          <ProtectedRoute allowedRoles={['employee']}>
+            <EmployeesPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default Redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
