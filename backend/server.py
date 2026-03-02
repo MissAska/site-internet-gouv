@@ -701,7 +701,7 @@ async def get_businesses(user: dict = Depends(get_current_user)):
     
     # Non-admin: only current week totals
     if user["role"] != UserRole.ADMIN:
-        match_filter["created_at"] = {"$gte": get_current_week_start().isoformat()}
+        match_filter["created_at"] = {"$gte": (await get_accounting_period_start()).isoformat()}
     
     totals_agg = await db.transactions.aggregate([
         {"$match": match_filter},
@@ -1043,7 +1043,7 @@ async def get_transactions(
     if user["role"] != UserRole.ADMIN:
         query["business_id"] = user["business_id"]
         # Non-admin users only see current week transactions
-        query["created_at"] = {"$gte": get_current_week_start().isoformat()}
+        query["created_at"] = {"$gte": (await get_accounting_period_start()).isoformat()}
     if type:
         query["type"] = type
     
@@ -1567,7 +1567,7 @@ async def get_business_stats(business_id: str, user: dict = Depends(get_current_
     
     # Non-admin: current week only. Admin: all time
     if user["role"] != UserRole.ADMIN:
-        date_filter = get_current_week_start().isoformat()
+        date_filter = (await get_accounting_period_start()).isoformat()
         transactions_count = await db.transactions.count_documents({"business_id": business_id, "created_at": {"$gte": date_filter}})
     else:
         date_filter = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
