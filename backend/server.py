@@ -1013,6 +1013,8 @@ async def get_transactions(
     query = {}
     if user["role"] != UserRole.ADMIN:
         query["business_id"] = user["business_id"]
+        # Non-admin users only see current week transactions
+        query["created_at"] = {"$gte": get_current_week_start().isoformat()}
     if type:
         query["type"] = type
     
