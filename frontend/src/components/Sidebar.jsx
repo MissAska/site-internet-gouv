@@ -40,11 +40,14 @@ const Sidebar = () => {
 
   const patronLinks = [
     { to: '/business', icon: LayoutDashboard, label: 'Tableau de bord' },
+    { to: '/cash-register', icon: DollarSign, label: 'Caisse' },
+    { to: '/business/vehicle-orders', icon: ClipboardList, label: 'Commandes véhicules' },
+    { to: '/business/dna-orders', icon: Wrench, label: 'Suivi DNA' },
+    { to: '/business/vehicle-catalog', icon: Car, label: 'Catalogue véhicules' },
     { to: '/business/employees', icon: Users, label: 'Employés' },
     { to: '/business/transactions', icon: Activity, label: 'Transactions' },
     { to: '/business/accounting', icon: Calculator, label: 'Comptabilité' },
     { to: '/business/tax-notices', icon: FileText, label: 'Avis d\'impôts' },
-    { to: '/cash-register', icon: DollarSign, label: 'Caisse' },
   ];
 
   // Dynamic employee links based on permissions
