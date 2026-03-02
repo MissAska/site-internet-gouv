@@ -239,6 +239,26 @@ def get_current_week_start():
     week_start = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days_since_sunday)
     return week_start
 
+async def get_accounting_period_start():
+    """Returns the start of the current accounting period.
+    This is the MOST RECENT of: last Sunday 00:00 UTC OR last manual/auto reset."""
+    week_start = get_current_week_start()
+    setting = await db.settings.find_one({"key": "last_accounting_reset"}, {"_id": 0})
+    if setting and setting.get("value"):
+        last_reset = datetime.fromisoformat(setting["value"])
+        if last_reset > week_start:
+            return last_reset
+    return week_start
+
+async def set_accounting_reset():
+    """Mark the current time as the last accounting reset"""
+    now = datetime.now(timezone.utc).isoformat()
+    await db.settings.update_one(
+        {"key": "last_accounting_reset"},
+        {"$set": {"key": "last_accounting_reset", "value": now}},
+        upsert=True
+    )
+
 async def create_weekly_snapshots():
     """Create accounting snapshots for all businesses"""
     now = datetime.now(timezone.utc)
