@@ -10,7 +10,8 @@ import {
   Settings,
   DollarSign,
   LayoutDashboard,
-  Calculator
+  Calculator,
+  History
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -28,6 +29,7 @@ const Sidebar = () => {
     { to: '/admin/businesses', icon: Building2, label: 'Entreprises' },
     { to: '/admin/users', icon: Users, label: 'Comptes' },
     { to: '/admin/accounting', icon: Calculator, label: 'Comptabilité' },
+    { to: '/admin/accounting-history', icon: History, label: 'Historique comptable' },
     { to: '/admin/expenses', icon: Activity, label: 'Dépenses' },
     { to: '/admin/tax-notices', icon: FileText, label: 'Avis d\'impôts' },
     { to: '/admin/tax-brackets', icon: Settings, label: 'Tranches fiscales' },
