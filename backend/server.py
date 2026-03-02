@@ -703,6 +703,7 @@ async def create_business(data: BusinessCreate, admin: dict = Depends(require_ad
         "name": data.name,
         "owner_id": owner_id,
         "owner_name": data.owner_name,
+        "business_type": data.business_type,
         "created_at": now
     }
     await db.businesses.insert_one(business_doc)
@@ -712,6 +713,7 @@ async def create_business(data: BusinessCreate, admin: dict = Depends(require_ad
         name=data.name,
         owner_id=owner_id,
         owner_name=data.owner_name,
+        business_type=data.business_type,
         created_at=now,
         total_income=0.0,
         total_expenses=0.0,
