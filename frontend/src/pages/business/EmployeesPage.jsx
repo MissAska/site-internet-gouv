@@ -283,10 +283,13 @@ const EmployeesPage = () => {
                           <p className="font-medium text-sm">{perm.label}</p>
                           <p className="text-xs text-muted-foreground">{perm.description}</p>
                         </div>
-                        <Checkbox
-                          checked={!!formData.permissions[perm.key]}
-                          className="pointer-events-none"
-                        />
+                        <div className={`h-4 w-4 shrink-0 rounded-sm border shadow flex items-center justify-center ${
+                          formData.permissions[perm.key]
+                            ? 'bg-primary border-primary text-primary-foreground'
+                            : 'border-muted-foreground'
+                        }`}>
+                          {formData.permissions[perm.key] && <Check className="h-3 w-3" />}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -478,10 +481,13 @@ const EmployeesPage = () => {
                         <p className="font-medium text-sm">{perm.label}</p>
                         <p className="text-xs text-muted-foreground">{perm.description}</p>
                       </div>
-                      <Checkbox
-                        checked={!!editData.permissions[perm.key]}
-                        className="pointer-events-none"
-                      />
+                      <div className={`h-4 w-4 shrink-0 rounded-sm border shadow flex items-center justify-center ${
+                        editData.permissions[perm.key]
+                          ? 'bg-primary border-primary text-primary-foreground'
+                          : 'border-muted-foreground'
+                      }`}>
+                        {editData.permissions[perm.key] && <Check className="h-3 w-3" />}
+                      </div>
                     </div>
                   ))}
                 </div>
