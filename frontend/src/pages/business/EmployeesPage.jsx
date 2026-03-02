@@ -285,11 +285,7 @@ const EmployeesPage = () => {
                           <p className="text-xs text-muted-foreground">{perm.description}</p>
                         </div>
                         <Checkbox
-                          checked={formData.permissions[perm.key]}
-                          onCheckedChange={(checked) => setFormData({
-                            ...formData,
-                            permissions: { ...formData.permissions, [perm.key]: checked }
-                          })}
+                          checked={!!formData.permissions[perm.key]}
                           className="pointer-events-none"
                         />
                       </div>
@@ -484,11 +480,7 @@ const EmployeesPage = () => {
                         <p className="text-xs text-muted-foreground">{perm.description}</p>
                       </div>
                       <Checkbox
-                        checked={editData.permissions[perm.key]}
-                        onCheckedChange={(checked) => setEditData({
-                          ...editData,
-                          permissions: { ...editData.permissions, [perm.key]: checked }
-                        })}
+                        checked={!!editData.permissions[perm.key]}
                         className="pointer-events-none"
                       />
                     </div>
