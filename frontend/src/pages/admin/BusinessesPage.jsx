@@ -99,7 +99,8 @@ const BusinessesPage = () => {
     setEditData({
       id: business.id,
       name: business.name,
-      owner_name: business.owner_name
+      owner_name: business.owner_name,
+      business_type: business.business_type || 'standard'
     });
     setEditDialogOpen(true);
   };
